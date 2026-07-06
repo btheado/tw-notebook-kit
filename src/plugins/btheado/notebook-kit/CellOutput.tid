@@ -1,0 +1,3 @@
+title: $:/plugins/btheado/notebook-kit/CellOutput
+
+<div class="tc-notebook-output" data-tiddler-title={{{ [<currentTiddler>get[draft.of]else<currentTiddler>] }}}/>

@@ -1,0 +1,21 @@
+title: $:/plugins/btheado/notebook-kit/NotebookStoryTemplate
+code-body: yes
+
+\procedure createCell()
+<$action-createtiddler  $basetitle={{{ [<currentTiddler>addsuffix[/cell]] }}} type="application/javascript">
+	<$action-sendmessage $message="tm-edit-tiddler" $param=<<createTiddler-title>>/>
+</$action-createtiddler>
+\end
+
+<$notebook-kit>
+  <$navigator story=<<currentTiddler>> history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}>
+    <div><$button actions=<<createCell>>>Create Cell</$button></div>
+    <$list
+      filter="[list<currentTiddler>]"
+      history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}
+      template="$:/plugins/btheado/notebook-kit/ViewTemplate"
+      editTemplate="$:/plugins/btheado/notebook-kit/EditTemplate"
+      storyview="classic"
+      emptyMessage="No notebook cells"/>
+  </$navigator>
+</$notebook-kit>

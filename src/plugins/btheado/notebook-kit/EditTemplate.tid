@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/EditTemplate
+
+{{||$:/plugins/btheado/notebook-kit/CellOutput}}
+{{||$:/core/ui/EditTemplate}}
