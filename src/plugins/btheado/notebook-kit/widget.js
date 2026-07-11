@@ -123,6 +123,8 @@ function modeForTiddler(tiddler) {
 
 const noobserver = {};
 function dispose(variable) {
+	if(variable._disposed) return;
+	variable._disposed = true;
 	variable._observer &&= noobserver; // don't render undefined
 	variable.delete();
 }
@@ -159,6 +161,7 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 	this.domNodes.push(this.notebookRoot);
 
 	this.cells = new Map(); // output DOM element -> cell record
+	this.cellsByTitle = new Map(); // tiddler title -> the currently "live" cell for that title
 	this.runtime = null;
 	this.kit = null;
 	this.removed = false;
@@ -213,6 +216,9 @@ NotebookWidget.prototype.reconcileCells = function() {
 		if(!currentSet.has(element)) {
 			self.disposeCell(cell);
 			self.cells.delete(element);
+			if(self.cellsByTitle.get(cell.title) === cell) {
+				self.cellsByTitle.delete(cell.title);
+			}
 			changed = true;
 		}
 	});
@@ -234,17 +240,32 @@ NotebookWidget.prototype.createCell = function(element) {
 		console.warn("tc-notebook: output element is missing its '" + this.titleAttribute + "' attribute", element);
 	}
 
+	// If another (older) element is still live for this same title - almost
+	// certainly a transition/animation overlap - supersede it now. Dispose
+	// its runtime variables synchronously so the new definition doesn't
+	// collide, but leave its DOM bookkeeping alone; the removal loop above
+	// will clean up `this.cells` for it once its element actually leaves
+	// the DOM (disposeCell is idempotent, see below).
+	var stale = this.cellsByTitle.get(title);
+	if(stale && stale.root !== element) {
+		this.disposeCell(stale);
+		stale.superseded = true;
+	}
+
 	var cell = {
 		title: title,
 		root: element,
 		variables: [],
 		lastType: null,
-		lastText: null
+		lastText: null,
+		superseded: false
 	};
 
 	if(this.runtime && this.kit) {
 		this.evaluateCell(cell);
 	}
+
+	this.cellsByTitle.set(title, cell);
 
 	return cell;
 };
@@ -293,6 +314,7 @@ NotebookWidget.prototype.reevaluateChangedCells = function(changedTiddlers) {
 	var self = this;
 	var any = false;
 	this.cells.forEach(function(cell) {
+		if(cell.superseded) return;
 		if(changedTiddlers[cell.title]) {
 			var tiddler = self.wiki.getTiddler(cell.title);
 			var textChanged = !tiddler || tiddler.fields.text !== cell.lastText;
