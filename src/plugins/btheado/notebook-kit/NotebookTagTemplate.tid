@@ -1,0 +1,16 @@
+title: $:/plugins/btheado/notebook-kit/NotebookTagTemplate
+code-body: yes
+
+\procedure createCell()
+<$action-createtiddler  $basetitle={{{ [<currentTiddler>addsuffix[/cell]] }}} type="application/javascript" tags={{{ [<currentTiddler>format:titlelist[]] }}}>
+	<$action-sendmessage $message="tm-edit-tiddler" $param=<<createTiddler-title>>/>
+</$action-createtiddler>
+\end
+
+<$notebook-kit>
+<div><$button actions=<<createCell>>>Create Cell</$button></div>
+<$list filter="[tag<currentTiddler>!has[draft.of]]">
+{{||$:/plugins/btheado/notebook-kit/CellOutput}}
+{{||$:/core/ui/ViewTemplate/body/default}}
+</$list>
+</$notebook-kit>
