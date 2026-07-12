@@ -15,7 +15,6 @@ code-body: yes
       history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}
       template="$:/plugins/btheado/notebook-kit/ViewTemplate"
       editTemplate="$:/plugins/btheado/notebook-kit/EditTemplate"
-      storyview="classic"
       emptyMessage="No notebook cells"/>
   </$navigator>
 </$notebook-kit>

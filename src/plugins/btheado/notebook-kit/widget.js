@@ -160,12 +160,11 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 	parent.insertBefore(this.notebookRoot, nextSibling);
 	this.domNodes.push(this.notebookRoot);
 
-	this.cells = new Map(); // output DOM element -> cell record
-	this.cellsByTitle = new Map(); // tiddler title -> the currently "live" cell for that title
+	this.cells = new Map(); // title -> cell record, persistent for widget lifetime
 	this.runtime = null;
 	this.kit = null;
 	this.removed = false;
-debugger;
+
 	this.renderChildren(this.notebookRoot, null);
 	this.reconcileCells();
 
@@ -178,7 +177,7 @@ debugger;
 			self.evaluateCell(cell);
 		});
 	}).catch(function(error) {
-    // TODO: display something in the DOM
+		// TODO: display something in the DOM
 		console.error("tc-notebook: failed to load Observable Notebook Kit", error);
 	});
 };
@@ -189,44 +188,41 @@ NotebookWidget.prototype.execute = function() {
 	this.makeChildWidgets();
 };
 
-/* Find every element within our DOM scope that currently marks itself
-   as a cell's output target. */
-NotebookWidget.prototype.findOutputElements = function() {
+
+NotebookWidget.prototype.findHostElements = function() {
+	// hosts mark WHERE a cell's output should live; they are not the output itself
 	var selector = this.outputSelector;
 	var root = this.notebookRoot;
 	var results = Array.prototype.slice.call(root.querySelectorAll(selector));
-	if(root.matches && root.matches(selector)) {
-		results.unshift(root);
-	}
+	if(root.matches && root.matches(selector)) results.unshift(root);
 	return results;
 };
 
-/* Reconcile our tracked cells against whatever output elements currently
-   exist in the DOM. Cells are keyed by DOM element identity, so they
-   naturally come and go as the nested $list/$navigator adds, removes,
-   or swaps to an edit template - no filter or title list to maintain
-   here at all. Returns true if anything changed. */
 NotebookWidget.prototype.reconcileCells = function() {
 	var self = this;
-	var currentElements = this.findOutputElements();
-	var currentSet = new Set(currentElements);
-	var changed = false;
+	var hosts = this.findHostElements();
+	var titlesPresent = new Set();
 
-	this.cells.forEach(function(cell, element) {
-		if(!currentSet.has(element)) {
-			self.disposeCell(cell);
-			self.cells.delete(element);
-			if(self.cellsByTitle.get(cell.title) === cell) {
-				self.cellsByTitle.delete(cell.title);
-			}
-			changed = true;
+	hosts.forEach(function(host) {
+		var title = host.getAttribute(self.titleAttribute);
+		if(!title) {
+			console.warn("tc-notebook: host element is missing its '" + self.titleAttribute + "' attribute", host);
+			return;
 		}
+		titlesPresent.add(title);
+		var cell = self.cells.get(title);
+		if(!cell) {
+			cell = self.createCell(title);
+			self.cells.set(title, cell);
+		}
+		self.attachOutput(cell, host);
 	});
 
-	currentElements.forEach(function(element) {
-		if(!self.cells.has(element)) {
-			var cell = self.createCell(element);
-			self.cells.set(element, cell);
+	var changed = false;
+	this.cells.forEach(function(cell, title) {
+		if(!titlesPresent.has(title)) {
+			self.disposeCell(cell);
+			self.cells.delete(title);
 			changed = true;
 		}
 	});
@@ -234,38 +230,22 @@ NotebookWidget.prototype.reconcileCells = function() {
 	return changed;
 };
 
-NotebookWidget.prototype.createCell = function(element) {
-	var title = element.getAttribute(this.titleAttribute);
-	if(!title) {
-		console.warn("tc-notebook: output element is missing its '" + this.titleAttribute + "' attribute", element);
-	}
+NotebookWidget.prototype.attachOutput = function(cell, host) {
+	if(host.firstElementChild === cell.root) return;
+	host.insertBefore(cell.root, host.firstChild);
+};
 
-	// If another (older) element is still live for this same title - almost
-	// certainly a transition/animation overlap - supersede it now. Dispose
-	// its runtime variables synchronously so the new definition doesn't
-	// collide, but leave its DOM bookkeeping alone; the removal loop above
-	// will clean up `this.cells` for it once its element actually leaves
-	// the DOM (disposeCell is idempotent, see below).
-	var stale = this.cellsByTitle.get(title);
-	if(stale && stale.root !== element) {
-		this.disposeCell(stale);
-		stale.superseded = true;
-	}
-
+NotebookWidget.prototype.createCell = function(title) {
 	var cell = {
 		title: title,
-		root: element,
+		root: this.document.createElement("div"),
 		variables: [],
 		lastType: null,
-		lastText: null,
-		superseded: false
+		lastText: null
 	};
+	cell.root.className = "tc-notebook-output-content";
 
-	if(this.runtime && this.kit) {
-		this.evaluateCell(cell);
-	}
-
-	this.cellsByTitle.set(title, cell);
+	if(this.runtime && this.kit) this.evaluateCell(cell);
 
 	return cell;
 };
@@ -306,6 +286,7 @@ NotebookWidget.prototype.disposeCell = function(cell) {
 	// (the $list, typically) - it's responsible for adding/removing it.
 	// We just stop tracking it and tear down its notebook-kit variables.
 	clearCellVariables(cell);
+	cell.root.remove();
 };
 
 /* For cells whose output element persisted across this refresh, check
@@ -313,16 +294,15 @@ NotebookWidget.prototype.disposeCell = function(cell) {
 NotebookWidget.prototype.reevaluateChangedCells = function(changedTiddlers) {
 	var self = this;
 	var any = false;
-	this.cells.forEach(function(cell) {
-		if(cell.superseded) return;
-		if(changedTiddlers[cell.title]) {
-			var tiddler = self.wiki.getTiddler(cell.title);
-			var textChanged = !tiddler || tiddler.fields.text !== cell.lastText;
-			var typeChanged = !tiddler || tiddler.fields.type !== cell.lastType;
-			if(textChanged || typeChanged) {
-				self.evaluateCell(cell);
-				any = true;
-			}
+	Object.keys(changedTiddlers).forEach(function(title) {
+		var cell = self.cells.get(title);
+		if(!cell) return;
+		var tiddler = self.wiki.getTiddler(title);
+		var textChanged = !tiddler || tiddler.fields.text !== cell.lastText;
+		var typeChanged = !tiddler || tiddler.fields.type !== cell.lastType;
+		if(textChanged || typeChanged) {
+			self.evaluateCell(cell);
+			any = true;
 		}
 	});
 	return any;
