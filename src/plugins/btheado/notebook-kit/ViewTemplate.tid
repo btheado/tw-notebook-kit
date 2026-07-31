@@ -1,4 +1,5 @@
 title: $:/plugins/btheado/notebook-kit/ViewTemplate
+code-body: yes
 
 {{||$:/plugins/btheado/notebook-kit/CellOutput}}
 {{||$:/core/ui/ViewTemplate}}
