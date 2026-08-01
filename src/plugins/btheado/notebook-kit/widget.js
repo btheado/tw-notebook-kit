@@ -201,6 +201,7 @@ NotebookWidget.prototype.findHostElements = function() {
 };
 
 NotebookWidget.prototype.reconcileCells = function() {
+	if (this.notebookRoot.isTiddlyWikiFakeDom) return;
 	var self = this;
 	var hosts = this.findHostElements();
 	var titlesPresent = new Set();
