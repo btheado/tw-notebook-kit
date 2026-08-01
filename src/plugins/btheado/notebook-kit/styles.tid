@@ -1,0 +1,49 @@
+title: $:/plugins/btheado/notebook-kit/styles
+tags: $:/tags/Stylesheet
+
+.tc-notebook-widget {
+	margin: 0.75em 0;
+}
+
+.tc-notebook-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin: 0 0 0.5em;
+}
+
+.tc-notebook-cell {
+	margin: 0.75em 0;
+	border: 1px solid <<colour foreground>>;
+	border-radius: 0.25em;
+	overflow: hidden;
+}
+
+.tc-notebook-cell-controls {
+	display: flex;
+	gap: 0.4em;
+	justify-content: flex-end;
+	padding: 0.25em 0.5em;
+	font-size: 0.85em;
+}
+
+.tc-notebook-output-content {
+	min-height: 1.5em;
+	padding: 0.5em;
+	border-bottom: 1px solid <<colour foreground>>;
+}
+
+.tc-notebook-output-content.tc-notebook-output-loading {
+	color: <<colour muted-foreground>>;
+	font-style: italic;
+}
+
+.tc-notebook-output-content.tc-notebook-output-error {
+	color: <<colour alert-highlight>>;
+	white-space: pre-wrap;
+}
+
+.tc-notebook-empty {
+	padding: 1em;
+	color: <<colour muted-foreground>>;
+	text-align: center;
+}
