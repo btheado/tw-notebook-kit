@@ -40,5 +40,5 @@ code-body: yes
     {{$:/core/images/close-button}}
    </$button>
 </div>
-{{||$:/core/ui/ViewTemplate/body/default}}
+<$codeblock code={{{ [<currentTiddler>get[text]] }}} language={{{ [<currentTiddler>get[type]else[text/vnd.tiddlywiki]] }}}/>
 </div>
