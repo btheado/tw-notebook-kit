@@ -1,5 +1,44 @@
 title: $:/plugins/btheado/notebook-kit/ViewTemplate
 code-body: yes
 
+<div class="tc-notebook-cell">
 {{||$:/plugins/btheado/notebook-kit/CellOutput}}
-{{||$:/core/ui/ViewTemplate}}
+<div class="tc-notebook-cell-controls">
+  <$button
+    actions=<<TODO>>
+    tooltip="move cell up"
+    aria-label="move cell up"
+    class="tc-btn-invisible tc-btn-mini">
+    {{$:/core/images/up-arrow}}
+  </$button>
+  <$button
+    actions=<<TODO>>
+    tooltip="move cell down"
+    aria-label="move cell down"
+    class="tc-btn-invisible tc-btn-mini">
+    {{$:/core/images/down-arrow}}
+  </$button>
+  <$button
+      tooltip="hide source code"
+      aria-label="hide source code"
+      class="tc-btn-invisible tc-btn-mini"
+      actions=<<TODO>>>
+      {{$:/core/images/fold-button}}
+  </$button>
+  <$button
+    message="tm-edit-tiddler"
+    tooltip={{$:/language/Buttons/Edit/Hint}}
+    aria-label={{$:/language/Buttons/Edit/Caption}}
+    class="tc-btn-invisible tc-btn-mini">
+    {{$:/core/images/edit-button}}
+   </$button>
+  <$button
+    message="tm-close-tiddler"
+    tooltip="remove cell from notebook (tiddler is kept)"
+    aria-label="remove cell from notebook (tiddler is kept)"
+    class="tc-btn-invisible tc-btn-mini">
+    {{$:/core/images/close-button}}
+   </$button>
+</div>
+{{||$:/core/ui/ViewTemplate/body/default}}
+</div>

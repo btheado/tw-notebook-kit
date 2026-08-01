@@ -9,12 +9,14 @@ code-body: yes
 
 <$notebook-kit>
   <$navigator story=<<currentTiddler>> history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}>
-    <div><$button actions=<<createCell>>>Create Cell</$button></div>
+    <div class="tc-notebook-toolbar">
+      <div><$button class="tc-btn-invisible tc-notebook-add-cell" actions=<<createCell>>>+ Create Cell</$button></div>
+    </div>
     <$list
       filter="[list<currentTiddler>]"
       history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}
       template="$:/plugins/btheado/notebook-kit/ViewTemplate"
       editTemplate="$:/plugins/btheado/notebook-kit/EditTemplate"
-      emptyMessage="No notebook cells"/>
+      emptyMessage="""<div class="tc-notebook-empty">No notebook cells yet.</div>"""/>
   </$navigator>
 </$notebook-kit>
