@@ -1,18 +1,40 @@
 title: $:/plugins/btheado/notebook-kit/ViewTemplate
 code-body: yes
 
+\procedure moveup()
+  <$action-setfield
+    $tiddler=<<tv-story-list>>
+    list={{{ [list<tv-story-list>] +[move:-1<currentTiddler>] :and[format:titlelist[]join[ ]] }}}
+  />
+  <$action-navigate/>
+
+  <!-- I've no clue why this isn't working
+  <$action-listops
+    $tidder=<<tv-story-list>>
+    $filter="[list<tv-story-list>] +[move:-1<currentTiddler>]"
+  />
+  -->
+\end
+\procedure movedown()
+  <$action-setfield
+    $tiddler=<<tv-story-list>>
+    list={{{ [list<tv-story-list>] +[move:1<currentTiddler>] :and[format:titlelist[]join[ ]] }}}
+  />
+  <$action-navigate/>
+\end
+
 <div class="tc-notebook-cell">
 {{||$:/plugins/btheado/notebook-kit/CellOutput}}
 <div class="tc-notebook-cell-controls">
   <$button
-    actions=<<TODO>>
+    actions=<<moveup>>
     tooltip="move cell up"
     aria-label="move cell up"
     class="tc-btn-invisible tc-btn-mini">
     {{$:/core/images/up-arrow}}
   </$button>
   <$button
-    actions=<<TODO>>
+    actions=<<movedown>>
     tooltip="move cell down"
     aria-label="move cell down"
     class="tc-btn-invisible tc-btn-mini">
