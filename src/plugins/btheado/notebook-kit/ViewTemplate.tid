@@ -40,13 +40,23 @@ code-body: yes
     class="tc-btn-invisible tc-btn-mini">
     {{$:/core/images/down-arrow}}
   </$button>
-  <$button
+  <%if [<folded-state>get[text]match[hide]] %>
+    <$button
+      actions=""" <$action-setfield $tiddler=<<folded-state>> text="show"/> """
+      tooltip="show source code"
+      aria-label="show source code"
+      class="tc-btn-invisible tc-btn-mini">
+      {{$:/core/images/unfold-button}}
+    </$button>
+  <%else%>
+    <$button
+      actions=""" <$action-setfield $tiddler=<<folded-state>> text="hide"/> """
       tooltip="hide source code"
       aria-label="hide source code"
-      class="tc-btn-invisible tc-btn-mini"
-      actions=<<TODO>>>
+      class="tc-btn-invisible tc-btn-mini">
       {{$:/core/images/fold-button}}
-  </$button>
+    </$button>
+  <%endif%>
   <$button
     message="tm-edit-tiddler"
     tooltip={{$:/language/Buttons/Edit/Hint}}
@@ -62,5 +72,7 @@ code-body: yes
     {{$:/core/images/close-button}}
    </$button>
 </div>
-<$codeblock code={{{ [<currentTiddler>get[text]] }}} language={{{ [<currentTiddler>get[type]else[text/vnd.tiddlywiki]] }}}/>
+<%if [<folded-state>get[text]else[show]match[show]] %>
+  <$codeblock code={{{ [<currentTiddler>get[text]] }}} language={{{ [<currentTiddler>get[type]else[text/vnd.tiddlywiki]] }}}/>
+<%endif%>
 </div>
