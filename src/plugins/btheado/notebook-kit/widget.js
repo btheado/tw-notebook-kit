@@ -177,8 +177,10 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 			self.evaluateCell(cell);
 		});
 	}).catch(function(error) {
-		// TODO: display something in the DOM
 		console.error("tc-notebook: failed to load Observable Notebook Kit", error);
+		self.cells.forEach(function(cell) {
+			self.showCellError(cell, "Could not load Observable Notebook Kit: " + error.message);
+		});
 	});
 };
 
@@ -243,11 +245,17 @@ NotebookWidget.prototype.createCell = function(title) {
 		lastType: null,
 		lastText: null
 	};
-	cell.root.className = "tc-notebook-output-content";
+	cell.root.className = "tc-notebook-output-content tc-notebook-output-loading";
+	cell.root.textContent = "Loading notebook runtime…";
 
 	if(this.runtime && this.kit) this.evaluateCell(cell);
 
 	return cell;
+};
+
+NotebookWidget.prototype.showCellError = function(cell, message) {
+	cell.root.className = "tc-notebook-output-content observablehq--error";
+	cell.root.textContent = "SyntaxError: " + message;
 };
 
 NotebookWidget.prototype.evaluateCell = function(cell) {
@@ -270,6 +278,7 @@ NotebookWidget.prototype.evaluateCell = function(cell) {
 			id: cell.title,
 			body: eval.call(null, transpiled.body)
 		});
+		cell.root.className = "tc-notebook-output-content";
 		cell.root.textContent = "";
 		// `cell` acts as notebook-kit's "node": it has `.root` (read live off
 		// this object, so later runtime updates keep targeting whatever
@@ -277,7 +286,7 @@ NotebookWidget.prototype.evaluateCell = function(cell) {
 		this.runtime.define(cell, definition);
 	} catch(error) {
 		console.error("tc-notebook: error evaluating cell '" + cell.title + "'", error);
-		cell.root.textContent = "Error: " + error.message;
+		this.showCellError(cell, error.message);
 	}
 };
 
