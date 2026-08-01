@@ -8,6 +8,7 @@ code-body: yes
 \end
 
 <$notebook-kit>
+  <$messagecatcher $nk-navigate-in-parent-to="<$action-navigate $to=<<event-paramObject-navigateTo>>/>">
   <$navigator story=<<currentTiddler>> history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}>
     <div class="tc-notebook-toolbar">
       <div><$button class="tc-btn-invisible tc-notebook-add-cell" actions=<<createCell>>>+ Create Cell</$button></div>
@@ -19,4 +20,5 @@ code-body: yes
       editTemplate="$:/plugins/btheado/notebook-kit/EditTemplate"
       emptyMessage="""<div class="tc-notebook-empty">No notebook cells yet.</div>"""/>
   </$navigator>
+  </$messagecatcher>
 </$notebook-kit>

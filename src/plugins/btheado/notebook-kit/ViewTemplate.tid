@@ -58,6 +58,13 @@ code-body: yes
     </$button>
   <%endif%>
   <$button
+    actions=""" <$action-sendmessage $message="nk-navigate-in-parent-to" $name="navigateTo" $value=<<currentTiddler>>/> """
+    tooltip="open in parent storyriver"
+    aria-label="open in parent storyriver"
+    class="tc-btn-invisible tc-btn-mini">
+    {{$:/core/images/open-window}}
+  </$button>
+  <$button
     message="tm-edit-tiddler"
     tooltip={{$:/language/Buttons/Edit/Hint}}
     aria-label={{$:/language/Buttons/Edit/Caption}}
