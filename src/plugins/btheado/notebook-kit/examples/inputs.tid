@@ -1,0 +1,26 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-inputs
+
+<$testcase>
+  <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
+  <$data title=Description text="notebook kit input widgets"/>
+  <$data title=Output text="""<$notebook-kit>
+<$list filter="[range[2]]">
+<$codeblock code={{!!text}}/> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
+</$list>
+</$notebook-kit>"""/>
+  <$data title="1" type="application/javascript" text="""const button = view(Inputs.button("Click me"));
+const range = view(Inputs.range([0, 100], {label: "x", step: 1}));
+const mute = view(Inputs.toggle({label: "Mute"}));
+const flavors = view(Inputs.checkbox(["salty", "sweet", "bitter", "sour", "umami"], {label: "Flavors"}));
+const name = view(Inputs.text({label: "Name", placeholder: "What’s your name?"}));
+const message = view(Inputs.textarea({label: "Message", placeholder: "Your message"}));"""/>
+  <$data title="2" type="application/javascript" text="""Inputs.table([
+  {what: "button", value: button},
+  {what: "mute", value: mute},
+  {what: "range", value: range},
+  {what: "flavors", value: flavors},
+  {what: "name", value: name},
+  {what: "message", value: message}
+])"""/>
+</$testcase>
+
