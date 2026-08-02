@@ -6,12 +6,21 @@ code-body: yes
 	<$action-sendmessage $message="tm-edit-tiddler" $param=<<createTiddler-title>>/>
 </$action-createtiddler>
 \end
+\procedure downloadNotebook()
+  <$action-sendmessage $message="tm-download-file"
+    $param="$:/core/templates/exporters/JsonFile"
+    exportFilter=`[[$(currentTiddler)$]] [list[$(currentTiddler)$]]`
+    filename={{{ [<currentTiddler>addsuffix[.json]] }}}
+    type="application/json"
+  />
+\end
 
 <$notebook-kit>
   <$messagecatcher $nk-navigate-in-parent-to="<$action-navigate $to=<<event-paramObject-navigateTo>>/>">
   <$navigator story=<<currentTiddler>> history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}>
     <div class="tc-notebook-toolbar">
       <div><$button class="tc-btn-invisible tc-notebook-add-cell" actions=<<createCell>>>+ Create Cell</$button></div>
+      <div><$button actions=<<downloadNotebook>>>{{$:/core/images/export-button}}</$button></div>
     </div>
     <$list
       filter="[list<currentTiddler>]"
