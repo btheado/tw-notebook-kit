@@ -1,4 +1,4 @@
-title: $:/plugins/btheado/notebook-kit/ViewTemplate
+title: $:/plugins/btheado/notebook-kit/ui/ViewTemplate
 code-body: yes
 
 \procedure moveup()
@@ -24,7 +24,7 @@ code-body: yes
 \end
 
 <div class="tc-notebook-cell">
-{{||$:/plugins/btheado/notebook-kit/CellOutput}}
+{{||$:/plugins/btheado/notebook-kit/ui/CellOutput}}
 <div class="tc-notebook-cell-controls">
   <$button
     actions=<<moveup>>

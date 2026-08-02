@@ -1,6 +1,0 @@
-title: $:/plugins/btheado/notebook-kit/EditTemplate
-
-<div class="tc-notebook-cell">
-{{||$:/plugins/btheado/notebook-kit/CellOutput}}
-{{||$:/core/ui/EditTemplate}}
-</div>

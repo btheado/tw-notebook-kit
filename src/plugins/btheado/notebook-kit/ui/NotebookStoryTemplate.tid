@@ -1,4 +1,4 @@
-title: $:/plugins/btheado/notebook-kit/NotebookStoryTemplate
+title: $:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate
 code-body: yes
 
 \procedure createCell()
@@ -16,8 +16,8 @@ code-body: yes
     <$list
       filter="[list<currentTiddler>]"
       history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}
-      template="$:/plugins/btheado/notebook-kit/ViewTemplate"
-      editTemplate="$:/plugins/btheado/notebook-kit/EditTemplate"
+      template="$:/plugins/btheado/notebook-kit/ui/ViewTemplate"
+      editTemplate="$:/plugins/btheado/notebook-kit/ui/EditTemplate"
       emptyMessage="""<div class="tc-notebook-empty">No notebook cells yet.</div>"""/>
   </$navigator>
   </$messagecatcher>

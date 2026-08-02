@@ -1,4 +1,4 @@
-title: $:/plugins/btheado/notebook-kit/NotebookTagTemplate
+title: $:/plugins/btheado/notebook-kit/ui/NotebookTagTemplate
 code-body: yes
 
 \procedure createCell()
@@ -10,7 +10,7 @@ code-body: yes
 <$notebook-kit>
 <div><$button actions=<<createCell>>>Create Cell</$button></div>
 <$list filter="[tag<currentTiddler>!has[draft.of]]">
-{{||$:/plugins/btheado/notebook-kit/CellOutput}}
+{{||$:/plugins/btheado/notebook-kit/ui/CellOutput}}
 {{||$:/core/ui/ViewTemplate/body/default}}
 </$list>
 </$notebook-kit>
