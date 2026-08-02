@@ -2,10 +2,11 @@ title: $:/plugins/btheado/notebook-kit/examples/cell-types
 
 <$testcase>
   <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
+  <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
   <$data title=Description text="various notebook kit cell types"/>
   <$data title=Output text="""<$notebook-kit>
 <$list filter="[range[5]]">
-{{!!type}} <$codeblock code={{!!text}}/> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
+{{!!type}} <$codeblock code={{!!text}} language={{!!type}} /> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
 </$list>
 </$notebook-kit>"""/>
   <$data title="1" type="text/x-markdown" text="""# Cell types

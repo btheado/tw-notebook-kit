@@ -34,3 +34,5 @@ In this example, the cell tiddlers are displayed as notebook output but cannot
 be edited from within the notebook. They are still evaluated and rendered as
 notebook cells.
 
+I highly recommend installing the Codemirror and Highlight plugins. Their syntax
+highlighting of source code is very useful.

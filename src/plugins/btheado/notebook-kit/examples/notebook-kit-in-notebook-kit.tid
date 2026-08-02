@@ -2,10 +2,11 @@ title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit
 
 <$testcase>
   <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
+  <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
   <$data title=Description text="notebook kit running inside notebook kit"/>
   <$data title=Output text="""<$notebook-kit>
 <$list filter="[range[7]]">
-<$codeblock code={{!!text}}/> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
+<$codeblock code={{!!text}} language={{!!type}}/> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
 </$list>
 </$notebook-kit>"""/>
   <$data title="1" type="application/javascript" text="""import {NotebookRuntime} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.8/runtime/+esm';
