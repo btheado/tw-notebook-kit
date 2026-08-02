@@ -1,0 +1,36 @@
+title: $:/plugins/btheado/notebook-kit/readme
+
+This plugin provides a `<$notebook-kit/>` widget that renders TiddlyWiki
+tiddlers as cells in an [[Observable Notebook Kit|https://observablehq.com/notebook-kit/]]
+notebook.
+
+To create a new notebook, add the following transclusion to a tiddler:
+
+```
+{{||$:/plugins/btheado/notebook-kit/NotebookStoryTemplate}}
+```
+
+This template wraps the `<$notebook-kit/>` widget with a story river, allowing
+the notebook's cells to be edited in place while viewing the notebook.
+
+The content of the `<$notebook-kit/>` widget completely determines the
+notebook's layout. After the widget has rendered, it scans the generated DOM
+for elements that identify notebook cells. Each matching element specifies the
+tiddler that should be evaluated as a notebook cell.
+
+An element with the `tc-notebook-output` class is treated as a notebook cell.
+The title of the cell tiddler is taken from its `data-tiddler-title` attribute.
+
+For example:
+
+```wiki
+<$notebook-kit>
+<div class="tc-notebook-output" data-tiddler-title="mynotebook/cell1"/>
+<div class="tc-notebook-output" data-tiddler-title="mynotebook/cell2"/>
+</$notebook-kit>
+```
+
+In this example, the cell tiddlers are displayed as notebook output but cannot
+be edited from within the notebook. They are still evaluated and rendered as
+notebook cells.
+
