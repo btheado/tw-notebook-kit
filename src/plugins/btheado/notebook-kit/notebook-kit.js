@@ -85,8 +85,8 @@ function add_notebook_kit_styles() {
 function loadNotebookKit() {
 	if(!notebookKitPromise) {
 		notebookKitPromise = Promise.all([
-			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.6/runtime/+esm"),
-			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.6/+esm")
+			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.9/runtime/+esm"),
+			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.9/+esm")
 		]).then(function(modules) {
 			return {
 				NotebookRuntime: modules[0].NotebookRuntime,
