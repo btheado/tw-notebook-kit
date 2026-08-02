@@ -38,3 +38,6 @@ notebook cells.
 
 I highly recommend installing the Codemirror and Highlight plugins. Their syntax
 highlighting of source code is very useful.
+
+''NOTE'': The notebook-kit library is not bundled with this plugin. It is loaded
+from a CDN on the internet. Therefore, this plugin is not offline capable.
