@@ -1,0 +1,11 @@
+title: $:/plugins/btheado/notebook-kit/ui/CreateNotebookButton
+
+\procedure createNotebook()
+<$action-createtiddler  $basetitle="Notebook" text="{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}">
+	<$action-navigate $to=<<createTiddler-title>>/>
+</$action-createtiddler>
+\end
+
+<$button actions=<<createNotebook>> class="tc-btn-text">
+Create Notebook
+</$button>

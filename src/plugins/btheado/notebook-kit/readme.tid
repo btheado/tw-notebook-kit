@@ -4,7 +4,9 @@ This plugin provides a `<$notebook-kit/>` widget that renders TiddlyWiki
 tiddlers as cells in an [[Observable Notebook Kit|https://observablehq.com/notebook-kit/]]
 notebook.
 
-To create a new notebook, add the following transclusion to a tiddler:
+To create a new notebook click this button: {{$:/plugins/btheado/notebook-kit/ui/CreateNotebookButton}}
+
+Or if you want to do it manaully, then add the following transclusion to a tiddler:
 
 ```
 {{||$:/plugins/btheado/notebook-kit/NotebookStoryTemplate}}
