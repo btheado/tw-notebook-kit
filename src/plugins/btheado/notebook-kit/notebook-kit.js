@@ -1,5 +1,5 @@
 /*\
-title: $:/plugins/btheado/notebook-kit/widget.js
+title: $:/plugins/btheado/notebook-kit/notebook-kit.js
 type: application/javascript
 module-type: widget
 
