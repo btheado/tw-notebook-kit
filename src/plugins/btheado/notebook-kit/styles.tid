@@ -9,6 +9,7 @@ tags: $:/tags/Stylesheet
 	display: flex;
 	justify-content: flex-end;
 	margin: 0 0 0.5em;
+	gap: 0.5em;
 }
 
 .tc-notebook-cell {
