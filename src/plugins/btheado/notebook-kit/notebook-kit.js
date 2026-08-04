@@ -53,34 +53,6 @@ var Widget = require("$:/core/modules/widgets/widget.js").widget;
 ------------------------------------------------------------------- */
 
 var notebookKitPromise = null;
-const style_urls = [
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/inspector.css',
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/highlight.css',
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/plot.css',
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/index.css',
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/theme-slate.css',
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/abstract-dark.css',
-    'https://raw.githubusercontent.com/observablehq/notebook-kit/6c2ec69e1ac30dd329789524a849578b2df17945/src/styles/syntax-dark.css'
-];
-
-// Maps each URL to a fetch Promise, resolves the text, 
-// and joins them together once all fetches succeed.
-const fetch_style_sheets = (urls) => {
-    return Promise.all(
-        urls.map(url => fetch(url).then(res => res.text()))
-    ).then(texts => texts.join("\n"));
-};
-
-function add_notebook_kit_styles() {
-    const view = document.defaultView;
-    const sheet = new view.CSSStyleSheet();
-    
-    // Fetch the styles and add them to the document
-    return fetch_style_sheets(style_urls).then(stylesText => {
-        sheet.replaceSync(stylesText);
-        document.adoptedStyleSheets.push(sheet);
-    });
-}
 
 function loadNotebookKit() {
 	if(!notebookKitPromise) {
@@ -93,7 +65,6 @@ function loadNotebookKit() {
 				transpile: modules[1].transpile
 			};
 		});
-		add_notebook_kit_styles();
 	}
 	return notebookKitPromise;
 }
