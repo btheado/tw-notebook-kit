@@ -1,0 +1,7 @@
+title: $:/plugins/btheado/notebook-kit/styles/readme
+
+Most of the files in this directory were fetched from
+
+https://github.com/observablehq/notebook-kit/blob/fdb42f4ba76e6eab1a4645207a743fa1c15ceb05/src/styles/
+
+and adapted to use tiddlywiki transclusion

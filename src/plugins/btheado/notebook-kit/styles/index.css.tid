@@ -1,0 +1,24 @@
+title: $:/plugins/btheado/notebook-kit/styles/index.css
+tags: $:/tags/Stylesheet
+
+\rules only transcludeinline conditional
+
+/* Copyright 2025 Observable, Inc. */
+
+{{$:/plugins/btheado/notebook-kit/styles/inspector.css}}
+{{$:/plugins/btheado/notebook-kit/styles/highlight.css}}
+{{$:/plugins/btheado/notebook-kit/styles/plot.css}}
+
+<%if [[$:/palette]get[text]get[color-scheme]match[light]] %>
+  {{$:/plugins/btheado/notebook-kit/styles/theme-glacier.css}}
+<%else%>
+  {{$:/plugins/btheado/notebook-kit/styles/theme-slate.css}}
+<%endif%>
+
+.observablehq--cell:empty {
+  min-height: 0;
+}
+
+.observablehq--cell:not(:empty) + pre {
+  margin-top: -11px;
+}
