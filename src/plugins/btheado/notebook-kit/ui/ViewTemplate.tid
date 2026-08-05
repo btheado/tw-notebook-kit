@@ -22,10 +22,26 @@ code-body: yes
   />
   <$action-navigate/>
 \end
+\procedure createCell()
+<$action-createtiddler  $basetitle={{{ [<tv-story-list>addsuffix[/cell]] }}} type="application/javascript">
+  <$action-setfield
+    $tiddler=<<tv-story-list>>
+    list={{{ [list<tv-story-list>insertafter<createTiddler-title>,<currentTiddler>format:titlelist[]join[ ]] }}}
+  />
+	<$action-sendmessage $message="tm-edit-tiddler" $param=<<createTiddler-title>>/>
+</$action-createtiddler>
+\end
 
 <div class="tc-notebook-cell">
 {{||$:/plugins/btheado/notebook-kit/ui/CellOutput}}
 <div class="tc-notebook-cell-controls">
+  <$button
+    actions=<<createCell>>
+    tooltip="create cell"
+    aria-label="create cell"
+    class="tc-btn-invisible tc-btn-mini">
+    {{$:/core/images/new-button}}
+  </$button>
   <$button
     actions=<<moveup>>
     tooltip="move cell up"
