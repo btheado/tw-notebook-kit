@@ -1,0 +1,10 @@
+created: 20260802160128804
+list: [[draw ellipses/cell]] [[draw ellipses/cell 3]] [[draw ellipses/cell 2]] [[draw ellipses/cell 1]] [[draw ellipses/cell 4]]
+modified: 20260805001806652
+tags: [[example notebook]]
+title: draw ellipses
+type: text/vnd.tiddlywiki
+
+Move the mouse around the canvas below to draw ellipses
+
+{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}

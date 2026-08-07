@@ -1,0 +1,8 @@
+created: 20260805003505103
+list: [[graphviz dot/cell 1]] [[graphviz dot/cell 2]] [[graphviz dot/cell 3]] [[graphviz dot/cell]]
+modified: 20260805214218821
+tags: [[example notebook]]
+title: graphviz dot
+type: text/vnd.tiddlywiki
+
+{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}

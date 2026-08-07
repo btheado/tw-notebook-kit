@@ -1,0 +1,10 @@
+created: 20260805000351596
+list: [[tiddlywiki filter/cell]] observeTwFilter
+modified: 20260805214726581
+tags: [[example notebook]]
+title: tiddlywiki filter
+type: text/vnd.tiddlywiki
+
+Calling `$tw.wiki.filterTiddlers` from a notebook cell will return a snapshot of the filter results and it won't update unless the notebook tiddler is refreshed. This example uses `notebook-kit`'s `Generators.observe` to glue the two reactivity systems together.
+
+{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}
