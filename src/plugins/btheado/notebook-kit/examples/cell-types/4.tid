@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/cell-types/4
+type: text/vnd.graphviz
+
+digraph { greet -> ${greet} }

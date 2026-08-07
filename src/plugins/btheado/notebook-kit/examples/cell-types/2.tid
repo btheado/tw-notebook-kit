@@ -1,0 +1,5 @@
+title: $:/plugins/btheado/notebook-kit/examples/cell-types/2
+type: text/x-typescript
+
+let greet: string = "world";
+display(greet)

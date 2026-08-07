@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/cell-types/5
+type: text/x-tex
+
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}

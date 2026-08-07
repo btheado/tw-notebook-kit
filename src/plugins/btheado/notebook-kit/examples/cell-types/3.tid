@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/cell-types/3
+type: text/html
+
+Hello, <b>${greet}</b>

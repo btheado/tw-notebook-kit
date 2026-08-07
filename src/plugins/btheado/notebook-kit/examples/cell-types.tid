@@ -9,22 +9,7 @@ title: $:/plugins/btheado/notebook-kit/examples/cell-types
 {{!!type}} <$codeblock code={{!!text}} language={{!!type}} /> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
 </$list>
 </$notebook-kit>"""/>
-  <$data title="1" type="text/x-markdown" text="""# Cell types
-
-The notebook-kit library supports many cell types. The tiddller `type` field is used to determine the type.
-
-- text/x-markdown - markdown
-- text/x-typescript - typescript
-- application/javascript - javascript
-- text/html - html
-- text/vnd.graphviz - graphviz dot
-- text/x-tex - latex math markup
-
-Javascript string interpolation is performed on all such cells. ${"`${greet}`"} = **${greet}**"""/>
-  <$data title="2" type="text/x-typescript" text="""let greet: string = "world";
-display(greet)"""/>
-  <$data title="3" type="text/html" text="Hello, <b>${greet}</b>"/>
-  <$data title="4" type="text/vnd.graphviz" text="digraph { greet -> ${greet} }"/>
-  <$data title="5" type="text/x-tex" text="\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}"/>
+<$list filter="[range[5]]" variable=cell>
+  <$data $tiddler={{{ [<currentTiddler>addsuffix[/]addsuffix<cell>] }}} title=<<cell>>/>
+</$list>
 </$testcase>
-

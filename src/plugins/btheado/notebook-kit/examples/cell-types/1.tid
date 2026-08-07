@@ -1,0 +1,15 @@
+title: $:/plugins/btheado/notebook-kit/examples/cell-types/1
+type: text/x-markdown
+
+# Cell types
+
+The notebook-kit library supports many cell types. The tiddller `type` field is used to determine the type.
+
+- text/x-markdown - markdown
+- text/x-typescript - typescript
+- application/javascript - javascript
+- text/html - html
+- text/vnd.graphviz - graphviz dot
+- text/x-tex - latex math markup
+
+Javascript string interpolation is performed on all such cells. ${"`${greet}`"} = **${greet}**
