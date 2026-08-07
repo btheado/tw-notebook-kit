@@ -1,0 +1,12 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-inputs/2
+type: application/javascript
+
+Inputs.table([
+  {what: "button", value: button},
+  {what: "mute", value: mute},
+  {what: "range", value: range},
+  {what: "flavors", value: flavors},
+  {what: "name", value: name},
+  {what: "message", value: message}
+])
+

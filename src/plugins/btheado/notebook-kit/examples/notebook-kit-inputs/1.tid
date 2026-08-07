@@ -1,0 +1,9 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-inputs/1
+type: application/javascript
+
+const button = view(Inputs.button("Click me"));
+const range = view(Inputs.range([0, 100], {label: "x", step: 1}));
+const mute = view(Inputs.toggle({label: "Mute"}));
+const flavors = view(Inputs.checkbox(["salty", "sweet", "bitter", "sour", "umami"], {label: "Flavors"}));
+const name = view(Inputs.text({label: "Name", placeholder: "What’s your name?"}));
+const message = view(Inputs.textarea({label: "Message", placeholder: "Your message"}));
