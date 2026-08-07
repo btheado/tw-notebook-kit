@@ -1,0 +1,5 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit/3
+type: application/javascript
+
+display(md`Click this button to simulate changing the cell's code`);
+const changeCell = view(Inputs.button("change cell"));

@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit/5
+type: application/javascript
+
+if (changeCell) {display(cell)}

@@ -1,0 +1,7 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit/4
+type: application/javascript
+
+const code = code_samples[changeCell % code_samples.length];
+display(code);
+clearCellVariables(cell);
+nr.define(cell, todef(transpileJavaScript(code), 1));

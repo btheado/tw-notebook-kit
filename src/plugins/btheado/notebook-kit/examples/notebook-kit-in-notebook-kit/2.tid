@@ -1,0 +1,10 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit/2
+type: application/javascript
+
+display(md`
+The notebook-kit cell output for
+\`\`\`js
+${code}
+\`\`\`
+is
+${cellDiv}`);

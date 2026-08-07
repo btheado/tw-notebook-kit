@@ -5,41 +5,12 @@ title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit
   <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
   <$data title=Description text="notebook kit running inside notebook kit"/>
   <$data title=Output text="""<$notebook-kit>
-<$list filter="[range[7]]">
+<$list filter="[range[6]]">
 <$codeblock code={{!!text}} language={{!!type}}/> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
 </$list>
 </$notebook-kit>"""/>
-  <$data title="1" type="application/javascript" text="""import {NotebookRuntime} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.8/runtime/+esm';
-import {transpileJavaScript} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.8/+esm';"""/>
-  <$data title="2" type="application/javascript" text="""display(md`
-The notebook-kit cell output for
-\`\`\`js
-${code}
-\`\`\`
-is
-${cellDiv}`);"""/>
-  <$data title="3" type="application/javascript" text="""display(md`Click this button to simulate changing the cell's code`);
-const changeCell = view(Inputs.button("change cell"));"""/>
-  <$data title="4" type="application/javascript" text="""const code = code_samples[changeCell % code_samples.length];
-display(code);
-clearCellVariables(cell);
-nr.define(cell, todef(transpileJavaScript(code), 1));"""/>
-  <$data title="5" type="application/javascript" text="if (changeCell) {display(cell)}"/>
-  <$data title="6" type="application/javascript" text="""const nr = new NotebookRuntime();
-const cellDiv = html`<div id="cell1"/>`;
-const code_samples = ["[1, 2, 3]", "[1, 2, 3, 4, 5]", "display(42);"];
-const cell = {root: cellDiv, variables: [] };
-const todef = (c, id) => ({...c, id, body: eval.call(null, c.body)});
-
-const noobserver = {};
-function dispose(variable) {
-  variable._observer &&= noobserver; // don’t render undefined
-  variable.delete();
-}
-
-const clearCellVariables = cell => {
-  cell.variables.forEach(dispose);
-  cell.variables = [];
-}; """/>
+<$list filter="[range[6]]" variable=cell>
+  <$data $tiddler={{{ [<currentTiddler>addsuffix[/]addsuffix<cell>] }}} title=<<cell>>/>
+</$list>
 </$testcase>
 
