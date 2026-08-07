@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/javascript/errors/1
+type: application/javascript
+
+123 abc; /* invalid syntax */

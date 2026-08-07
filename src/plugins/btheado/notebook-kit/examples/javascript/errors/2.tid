@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/javascript/errors/2
+type: application/javascript
+
+abc; /* runtime error */

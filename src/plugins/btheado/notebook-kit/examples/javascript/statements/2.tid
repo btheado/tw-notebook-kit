@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/javascript/statements/2
+type: application/javascript
+
+display(45); display(46);

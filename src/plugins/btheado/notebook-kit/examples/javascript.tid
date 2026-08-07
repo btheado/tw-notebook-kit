@@ -1,33 +1,26 @@
 title: $:/plugins/btheado/notebook-kit/examples/javascript
 
 \function c.r() [charcode[10]]
+\function path.to.code(path) [<currentTiddler>addsuffix[/]addsuffix<path>] :map:flat[all[shadows+tiddlers]prefix<currentTiddler>] -[<currentTiddler>]
 \function cell.display() [all[]] :map[<index>add[1]] :map[[<$codeblock code={{$(currentTiddler)$}} language="javascript"/> <div class="tc-notebook-output" data-tiddler-title="$(currentTiddler)$"/>]substitute[]]
-\procedure js-example(description code)
+
+\procedure js-example(description path)
 <$testcase>
   <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
   <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
   <$data title=Description text=<<description>>/>
   <$data title=Output text=`<$notebook-kit>
-${ [subfilter<code>cell.display[]join<c.r>] }$
+${ [path.to.code<path>get[text]cell.display[]join<c.r>] }$
 </$notebook-kit>`/>
-  <$list filter=<<code>> counter=index>
-    <$data title=<<index>> text=<<currentTiddler>> type="application/javascript"/>
+  <$list filter="[path.to.code<path>]" counter=index>
+    <$data $tiddler=<<currentTiddler>> title=<<index>>/>
   </$list>
 </$testcase>
 \end
 
 Basic `<$notebook-kit/>` javascript examples. Click on the numbered tabs to edit a cell's source code.
 
-<<js-example "cells containing only an expression have automatic output display" '42 "[1,2,3,4]" {a:1,b:2,c:3} [["hello"]]'>>
-<<js-example "javscript statements require explict call to 'display'" "
-  display(44);
-  [[display(45); display(46);]]
-">>
-<<js-example "cross-cell variables" "
-  [[const x = 42; display(x);]]
-  [[x * 9]]
-">>
-<<js-example "javascript errors" "
-  [[123 abc; /* invalid syntax */]]
-  [[abc; /* runtime error */]]
-">>
+<<js-example "cells containing only an expression have automatic output display" expressions>>
+<<js-example "javscript statements require explict call to 'display'" statements>>
+<<js-example "cross-cell variables" variables>>
+<<js-example "javascript errors" errors>>
