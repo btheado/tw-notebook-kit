@@ -3,6 +3,6 @@
   "description": "Widget for using tiddlers as executable javascript cells using observablehq's notebook-kit",
   "author": "Brian Theado",
   "core-version": ">=5.4.0",
-  "list": "readme",
+  "list": "readme examples",
   "version": "0.1.0"
 }

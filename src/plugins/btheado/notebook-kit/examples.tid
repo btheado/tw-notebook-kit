@@ -1,0 +1,31 @@
+title: $:/plugins/btheado/notebook-kit/examples
+
+\procedure examples() $:/plugins/btheado/notebook-kit/examples/
+
+\procedure open-extracted-examples() <$action-listops $tiddler="$:/StoryList" $subfilter="[removeprefix<examples>!regexp[\]]"/>
+
+Click the links to view `<$notebook-kit/>` widget examples:
+
+<ul>
+<$list filter="[all[shadows+tiddlers]] :filter[removeprefix<examples>!regexp[/]]" variable="src">
+<$list filter="[<src>removeprefix<examples>]" variable="dst">
+<li><$link to=<<src>>><<dst>></$link></li>
+</$list>
+</$list>
+</ul>
+
+Click the button below to "explode" the example notebook tiddlers into your wiki. These extracted
+notebooks uses the  full [[notebook story template|$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate]],
+
+<$button actions={{$:/plugins/btheado/notebook-kit/actions/extract-examples}}>
+Extract notebooks from plugin
+</$button>
+
+<%if [all[shadows+tiddlers]removeprefix<examples>!regexp[/]is[tiddler]] %>
+View extracted notebooks
+<ul>
+<$list filter="[all[shadows+tiddlers]removeprefix<examples>!regexp[/]]">
+<li><$link/></li>
+</$list>
+</ul>
+<%endif%>

@@ -1,0 +1,27 @@
+title: $:/plugins/btheado/notebook-kit/actions/extract-examples
+code-body: yes
+
+<$let examples="$:/plugins/btheado/notebook-kit/examples/">
+
+<!-- copy notebook cell tiddlers from plugin into main wiki -->
+<$list filter="[all[shadows+tiddlers]prefix<examples>regexp[/]]" variable="src">
+<$list filter="[<src>removeprefix<examples>!is[tiddler]!is[shadow]]" variable="dst">
+<$genesis
+  $type="$action-setfield"
+  $remappable="no"
+  $names="[<src>fields[]] -title $tiddler"
+  $values="[<src>fields[]] -title :map[<src>get<currentTiddler>] [<dst>]"/>
+</$list>
+</$list>
+
+<!-- copy notebook tiddlers from plugin and add cells to the list -->
+<$list filter="[all[shadows+tiddlers]] :filter[removeprefix<examples>!regexp[/]]" variable="src">
+<$list filter="[<src>removeprefix<examples>!is[tiddler]!is[shadow]]" variable="dst">
+<$action-setfield
+  $tiddler=<<dst>>
+  text="{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}"
+  list={{{ [all[shadows+tiddlers]prefix<src>] -[<src>] :and[removeprefix<examples>format:titlelist[]join[ ]] }}}/>
+</$list>
+</$list>
+
+</$let>
