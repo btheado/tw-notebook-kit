@@ -82,6 +82,7 @@ var MODE_BY_TYPE = {
 	"text/x-markdown": "md",
 	"text/html": "html",
 	"application/sql": "sql",
+	"image/svg+xml": "svg",
 	"text/x-tex": "tex",
 	"application/x-tex": "tex",
 	"text/vnd.graphviz": "dot"
