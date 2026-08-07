@@ -17,7 +17,7 @@ code-body: yes
 
 <$notebook-kit>
   <$messagecatcher $nk-navigate-in-parent-to="<$action-navigate $to=<<event-paramObject-navigateTo>>/>">
-  <$navigator story=<<currentTiddler>> history={{{ [<currentTiddler>addsuffix[/NavigatorHistory]] }}}>
+  <$navigator story=<<currentTiddler>> history={{{ [[$:/state/]addsuffix<currentTiddler>addsuffix[/NavigatorHistory]] }}}>
     <div class="tc-notebook-toolbar">
       <div><$button class="tc-btn-invisible" tooltip="create cell" aria-label="create cell" actions=<<createCell>>>{{$:/core/images/new-button}}</$button></div>
       <div><$button class="tc-btn-invisible" tooltip="download notebook" aria-label="download notebook" actions=<<downloadNotebook>>>{{$:/core/images/export-button}}</$button></div>
