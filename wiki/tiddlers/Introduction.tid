@@ -1,0 +1,15 @@
+created: 20260808012341536
+modified: 20260808012820779
+tags: 
+title: Introduction
+type: text/vnd.tiddlywiki
+
+Construct reactive javascript notebooks in tiddlywiki
+
+!! Example notebooks
+
+{{{ [tag[example notebook]] }}}
+
+!! Details
+
+{{$:/plugins/btheado/notebook-kit/readme}}
