@@ -20,6 +20,7 @@ code-body: yes
 <$action-setfield
   $tiddler=<<dst>>
   text="{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}"
+  tags="[[example notebook]]"
   list={{{ [all[shadows+tiddlers]prefix<src>] -[<src>] :and[removeprefix<examples>format:titlelist[]join[ ]] }}}/>
 </$list>
 </$list>
