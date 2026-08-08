@@ -24,7 +24,7 @@
     "tiddlywiki": "^5.4.0"
   },
   "scripts": {
-    "build:index": "npm run tw -- --build index",
+    "build:index": "npm run tw -- --output docs --build index",
     "tw": "cross-env TIDDLYWIKI_PLUGIN_PATH=./src/plugins:./node_modules/tiddlywiki/plugins tiddlywiki ./wiki --verbose",
     "tw_start": "npm run tw -- --server 8087 $:/core/save/all text/plain text/html '' '' 0.0.0.0"
   }
