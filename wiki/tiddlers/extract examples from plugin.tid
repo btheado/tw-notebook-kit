@@ -1,0 +1,8 @@
+code-body: yes
+created: 20260807025815891
+modified: 20260807113240330
+tags: $:/tags/StartupAction/Browser
+title: extract examples from plugin
+type: text/vnd.tiddlywiki
+
+{{$:/plugins/btheado/notebook-kit/actions/extract-examples}}
