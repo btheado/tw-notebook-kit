@@ -1,0 +1,14 @@
+title: $:/config/NotebookKitPlugin/TypeMappings/
+
+application/javascript: js
+text/javascript: js
+application/vnd.observable.javascript: ojs
+text/x-typescript: ts
+text/markdown: md
+text/x-markdown: md
+text/html: html
+application/sql: sql
+image/svg+xml: svg
+text/x-tex: tex
+application/x-tex: tex
+text/vnd.graphviz: dot

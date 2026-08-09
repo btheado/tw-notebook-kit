@@ -70,27 +70,15 @@ function loadNotebookKit() {
 }
 
 /* ---------------------------------------------------------------------
-   Map a tiddler's `type` field to a Notebook Kit language mode.
+   Mappings from a tiddler's `type` field to a Notebook Kit language mode
+   are stored in tiddlers with this prefix.
 ------------------------------------------------------------------- */
 
-var MODE_BY_TYPE = {
-	"application/javascript": "js",
-	"text/javascript": "js",
-	"application/vnd.observable.javascript": "ojs",
-	"text/x-typescript": "ts",
-	"text/markdown": "md",
-	"text/x-markdown": "md",
-	"text/html": "html",
-	"application/sql": "sql",
-	"image/svg+xml": "svg",
-	"text/x-tex": "tex",
-	"application/x-tex": "tex",
-	"text/vnd.graphviz": "dot"
-};
+var TYPE_MAPPING_PREFIX = "$:/config/NotebookKitPlugin/TypeMappings/";
 
-function modeForTiddler(tiddler) {
+function modeForTiddler(wiki, tiddler) {
 	var type = (tiddler && tiddler.fields.type) || "";
-	return MODE_BY_TYPE[type] || "js";
+	return wiki.getTiddlerText(TYPE_MAPPING_PREFIX + type);
 }
 
 const noobserver = {};
@@ -216,7 +204,8 @@ NotebookWidget.prototype.createCell = function(title) {
 		root: this.document.createElement("div"),
 		variables: [],
 		lastType: null,
-		lastText: null
+		lastText: null,
+		lastMode: null
 	};
 	cell.root.className = "tc-notebook-output-content tc-notebook-output-loading";
 	cell.root.textContent = "Loading notebook runtime…";
@@ -234,16 +223,23 @@ NotebookWidget.prototype.showCellError = function(cell, message) {
 NotebookWidget.prototype.evaluateCell = function(cell) {
 	var tiddler = this.wiki.getTiddler(cell.title);
 	var text = (tiddler && tiddler.fields.text) || "";
-	var mode = modeForTiddler(tiddler);
+	var mode = modeForTiddler(this.wiki, tiddler);
 
 	cell.lastType = tiddler && tiddler.fields.type;
 	cell.lastText = text;
+	cell.lastMode = mode;
 
 	if(!this.runtime || !this.kit) {
 		return; // runtime still loading; will be evaluated once ready
 	}
 
 	clearCellVariables(cell);
+	if(!mode) {
+		// An unmapped type is intentionally not interpreted as JavaScript.
+		cell.root.className = "tc-notebook-output-content";
+		cell.root.textContent = "";
+		return;
+	}
 
 	try {
 		var transpiled = this.kit.transpile(text, mode);
@@ -287,6 +283,17 @@ NotebookWidget.prototype.reevaluateChangedCells = function(changedTiddlers) {
 			any = true;
 		}
 	});
+	if(Object.keys(changedTiddlers).some(function(title) {
+		return title.indexOf(TYPE_MAPPING_PREFIX) === 0;
+	})) {
+		this.cells.forEach(function(cell) {
+			var tiddler = self.wiki.getTiddler(cell.title);
+			if(modeForTiddler(self.wiki, tiddler) !== cell.lastMode) {
+				self.evaluateCell(cell);
+				any = true;
+			}
+		});
+	}
 	return any;
 };
 

@@ -36,6 +36,20 @@ In this example, the cell tiddlers are displayed as notebook output but cannot
 be edited from within the notebook. They are still evaluated and rendered as
 notebook cells.
 
+!! Cell type mappings
+
+The cell's `type` field selects its Notebook Kit language mode. Mappings are
+ordinary configuration tiddlers below `$:/config/NotebookKitPlugin/TypeMappings/`.
+For example, create `$:/config/NotebookKitPlugin/TypeMappings/text/x-python`
+with the text `python` to evaluate `text/x-python` cells in Python mode. Each
+added cell type requires a JavaScript tagged template literal function whose
+name matches the mapped mode (in this example, `python`). The plugin supplies
+defaults for JavaScript, Observable JavaScript, TypeScript, Markdown, HTML,
+SQL, SVG, TeX, and Graphviz. Unmapped cell types are not transpiled or
+evaluated.
+
+!! Notes
+
 I highly recommend installing the Codemirror and Highlight plugins. Their syntax
 highlighting of source code is very useful.
 
