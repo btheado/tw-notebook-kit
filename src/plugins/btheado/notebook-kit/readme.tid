@@ -2,7 +2,7 @@ title: $:/plugins/btheado/notebook-kit/readme
 
 This plugin provides a `<$notebook-kit/>` widget that renders TiddlyWiki
 tiddlers as cells in an [[Observable Notebook Kit|https://observablehq.com/notebook-kit/]]
-notebook.
+notebook. The [[notebooks 2.0 system guide|https://new.observablehq.com/@observablehq/notebooks-2-0-system-guide]] explains about writing notebook cells.
 
 To create a new notebook click this button: {{$:/plugins/btheado/notebook-kit/ui/CreateNotebookButton}}
 
