@@ -96,6 +96,10 @@ code-body: yes
    </$button>
 </div>
 <%if [<folded-state>get[text]else[show]match[show]] %>
-  <$codeblock code={{{ [<currentTiddler>get[text]] }}} language={{{ [<currentTiddler>get[type]else[text/vnd.tiddlywiki]] }}}/>
+  <%if [[$:/config/NotebookKitPlugin/TypeMappings/]addsuffix{!!type}get[text]] %>
+    <$codeblock code={{{ [<currentTiddler>get[text]] }}} language={{{ [<currentTiddler>get[type]else[text/vnd.tiddlywiki]] }}}/>
+  <%else%>
+    {{||$:/core/ui/ViewTemplate/body}}
+  <%endif%>
 <%endif%>
 </div>

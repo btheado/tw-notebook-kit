@@ -1,3 +1,5 @@
 title: $:/plugins/btheado/notebook-kit/ui/CellOutput
 
-<div class="tc-notebook-output" data-tiddler-title={{{ [<currentTiddler>get[draft.of]else<currentTiddler>] }}}/>
+<%if [[$:/config/NotebookKitPlugin/TypeMappings/]addsuffix{!!type}get[text]] %>
+  <div class="tc-notebook-output" data-tiddler-title={{{ [<currentTiddler>get[draft.of]else<currentTiddler>] }}}/>
+<%endif%>
