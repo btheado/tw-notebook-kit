@@ -45,5 +45,5 @@ from a CDN on the internet. Therefore, this plugin is not offline capable.
 ''CAUTION'': Tiddlywiki does not allow script tags. Nor does it execute
 javascript tiddlers which are dragged into the wiki until the wiki is reloaded.
 Whatever security protections that provides is lost if you install this
-notebook-kit plugini as it allows immediate execution arbitrary javascript.
+notebook-kit plugin as it allows immediate execution arbitrary javascript.
 Proceed with caution when using this plugin.
