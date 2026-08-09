@@ -61,3 +61,8 @@ javascript tiddlers which are dragged into the wiki until the wiki is reloaded.
 Whatever security protections that provides is lost if you install this
 notebook-kit plugin as it allows immediate execution arbitrary javascript.
 Proceed with caution when using this plugin.
+
+!! Installation
+
+To install this plugin into your own wiki, drag and drop this link into your
+wiki: [[$:/plugins/btheado/notebook-kit]] and reload the wiki.

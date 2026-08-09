@@ -15,7 +15,7 @@ Click the links to view `<$notebook-kit/>` widget examples:
 </ul>
 
 Click the button below to "explode" the example notebook tiddlers into your wiki. These extracted
-notebooks uses the  full [[notebook story template|$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate]],
+notebooks uses the full [[notebook story template|$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate]]
 
 <$button actions={{$:/plugins/btheado/notebook-kit/actions/extract-examples}}>
 Extract notebooks from plugin
