@@ -48,6 +48,25 @@ defaults for JavaScript, Observable JavaScript, TypeScript, Markdown, HTML,
 SQL, SVG, TeX, and Graphviz. Unmapped cell types are not transpiled or
 evaluated.
 
+!! Tiddler attachments
+
+Notebook cells can use any tiddler as an Observable `FileAttachment`; the
+attachment name is the tiddler's exact title. The tiddler's `text` field is
+the file contents and its `type` field becomes the MIME type. For example, a
+tiddler named `data/points.csv` with `type: text/csv` can be read from a
+JavaScript cell with:
+
+```js
+points = FileAttachment("data/points.csv").csv({typed: true})
+```
+
+Text tiddlers are encoded as UTF-8. A tiddler with `encoding: base64` is
+decoded first, allowing binary attachments such as images to be stored as
+base64 text. Attachment URLs are local Blob URLs, so they work offline once
+Notebook Kit itself has loaded and do not expose a network endpoint.
+When an already-used attachment tiddler changes, the notebook re-runs so
+dependent cells read the new contents.
+
 !! Notes
 
 I highly recommend installing the Codemirror and Highlight plugins. Their syntax

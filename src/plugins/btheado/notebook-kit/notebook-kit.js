@@ -62,6 +62,9 @@ function loadNotebookKit() {
 		]).then(function(modules) {
 			return {
 				NotebookRuntime: modules[0].NotebookRuntime,
+				FileAttachment: modules[0].FileAttachment,
+				registerFile: modules[0].registerFile,
+				library: modules[0].library,
 				transpile: modules[1].transpile
 			};
 		});
@@ -94,6 +97,22 @@ function clearCellVariables(cell) {
 	cell.variables = [];
 }
 
+/* FileAttachment expects a synchronous name-to-URL resolver. Tiddlers have
+   no URL, so expose their contents as Blob URLs and retain them until the
+   tiddler changes or this widget is destroyed. */
+function attachmentBlob(tiddler) {
+	var fields = tiddler.fields;
+	var text = fields.text || "";
+	var type = fields.type || "application/octet-stream";
+	if(fields.encoding === "base64") {
+		var binary = atob(text);
+		var bytes = new Uint8Array(binary.length);
+		for(var i = 0; i < binary.length; ++i) bytes[i] = binary.charCodeAt(i);
+		return new Blob([bytes], {type: type});
+	}
+	return new Blob([text], {type: type});
+}
+
 /* ---------------------------------------------------------------------
    Widget
 ------------------------------------------------------------------- */
@@ -124,6 +143,7 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 	this.runtime = null;
 	this.kit = null;
 	this.removed = false;
+	this.attachmentUrls = new Map(); // title -> {text, type, encoding, url}
 
 	this.renderChildren(this.notebookRoot, null);
 	this.reconcileCells();
@@ -132,7 +152,16 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 	loadNotebookKit().then(function(kit) {
 		if(self.removed) return;
 		self.kit = kit;
-		self.runtime = new kit.NotebookRuntime();
+		// NotebookRuntime replaces (rather than augments) its default library
+		// when passed built-ins, so copy it before overriding FileAttachment.
+		// Library entries are zero-argument providers; the provider must return
+		// the FileAttachment function rather than being that function itself.
+		var builtins = Object.assign({}, kit.library, {
+			FileAttachment: function() {
+				return function(title) { return self.fileAttachmentForTiddler(title); };
+			}
+		});
+		self.runtime = new kit.NotebookRuntime(builtins);
 		self.cells.forEach(function(cell) {
 			self.evaluateCell(cell);
 		});
@@ -142,6 +171,46 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 			self.showCellError(cell, "Could not load Observable Notebook Kit: " + error.message);
 		});
 	});
+};
+
+NotebookWidget.prototype.resolveTiddlerAttachment = function(title) {
+	var tiddler = this.wiki.getTiddler(title);
+	var previous = this.attachmentUrls.get(title);
+	if(!tiddler) {
+		if(previous) {
+			if(this.kit) this.kit.registerFile(title, null);
+			URL.revokeObjectURL(previous.url);
+			this.attachmentUrls.delete(title);
+		}
+		return null;
+	}
+
+	var fields = tiddler.fields;
+	var text = fields.text || "";
+	var type = fields.type || "application/octet-stream";
+	var encoding = fields.encoding || "";
+	if(!previous || previous.text !== text || previous.type !== type || previous.encoding !== encoding) {
+		if(previous) URL.revokeObjectURL(previous.url);
+		previous = {
+			text: text,
+			type: type,
+			encoding: encoding,
+			url: URL.createObjectURL(attachmentBlob(tiddler))
+		};
+		this.attachmentUrls.set(title, previous);
+	}
+	return {url: previous.url, mimeType: type};
+};
+
+NotebookWidget.prototype.fileAttachmentForTiddler = function(title) {
+	title += "";
+	var attachment = this.resolveTiddlerAttachment(title);
+	if(!attachment) throw new Error("File not found: " + title);
+	/* The browser bundle does not export the fileAttachments helper from its
+	   TypeScript source. registerFile + FileAttachment is its equivalent public
+	   path: register our Blob URL, then create the standard file handle. */
+	this.kit.registerFile(title, {path: attachment.url, mimeType: attachment.mimeType});
+	return this.kit.FileAttachment(title);
 };
 
 NotebookWidget.prototype.execute = function() {
@@ -297,6 +366,27 @@ NotebookWidget.prototype.reevaluateChangedCells = function(changedTiddlers) {
 	return any;
 };
 
+/* FileAttachment has no dependency edge back to the tiddler resolver. When a
+   tiddler that was previously requested as an attachment changes, discard its
+   Blob URL and re-run the notebook so consumers fetch the new contents. */
+NotebookWidget.prototype.reevaluateChangedAttachments = function(changedTiddlers) {
+	var self = this;
+	var changed = Object.keys(changedTiddlers).some(function(title) {
+		var attachment = self.attachmentUrls.get(title);
+		if(!attachment) return false;
+		self.kit.registerFile(title, null);
+		URL.revokeObjectURL(attachment.url);
+		self.attachmentUrls.delete(title);
+		return true;
+	});
+	if(changed) {
+		this.cells.forEach(function(cell) {
+			self.evaluateCell(cell);
+		});
+	}
+	return changed;
+};
+
 NotebookWidget.prototype.refresh = function(changedTiddlers) {
 	var changedAttributes = this.computeAttributes();
 	if(changedAttributes.outputSelector || changedAttributes.titleAttribute) {
@@ -306,9 +396,10 @@ NotebookWidget.prototype.refresh = function(changedTiddlers) {
 
 	var childrenRefreshed = this.refreshChildren(changedTiddlers);
 	var cellsChanged = this.reconcileCells();
+	var attachmentsReevaluated = this.reevaluateChangedAttachments(changedTiddlers);
 	var reevaluated = this.reevaluateChangedCells(changedTiddlers);
 
-	return !!(childrenRefreshed || cellsChanged || reevaluated);
+	return !!(childrenRefreshed || cellsChanged || attachmentsReevaluated || reevaluated);
 };
 
 NotebookWidget.prototype.destroy = function() {
@@ -320,6 +411,13 @@ NotebookWidget.prototype.destroy = function() {
 	}
 	if(this.runtime && this.runtime.dispose) {
 		this.runtime.dispose();
+	}
+	if(this.attachmentUrls) {
+		this.attachmentUrls.forEach(function(attachment, title) {
+			if(self.kit) self.kit.registerFile(title, null);
+			URL.revokeObjectURL(attachment.url);
+		});
+		this.attachmentUrls.clear();
 	}
 	if(Widget.prototype.destroy) {
 		Widget.prototype.destroy.call(this);
