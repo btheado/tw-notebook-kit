@@ -5,11 +5,11 @@ title: $:/plugins/btheado/notebook-kit/examples/cell-types
   <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
   <$data title=Description text="various notebook kit cell types"/>
   <$data title=Output text="""<$notebook-kit>
-<$list filter="[range[5]]">
+<$list filter="[range[6]]">
 {{!!type}} <$codeblock code={{!!text}} language={{!!type}} /> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
 </$list>
 </$notebook-kit>"""/>
-<$list filter="[range[5]]" variable=cell>
+<$list filter="[range[6]]" variable=cell>
   <$data $tiddler={{{ [<currentTiddler>addsuffix[/]addsuffix<cell>] }}} title=<<cell>>/>
 </$list>
 </$testcase>

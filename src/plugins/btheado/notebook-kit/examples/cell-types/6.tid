@@ -1,0 +1,26 @@
+title: $:/plugins/btheado/notebook-kit/examples/cell-types/6
+type: text/mermaid
+
+flowchart TD
+    A([User opens notebook]) --> B[Load notebook cells]
+    B --> C{Cell type?}
+
+    C -->|JavaScript| D[Evaluate JavaScript]
+    C -->|Markdown| E[Render Markdown]
+    C -->|Mermaid| F[Render diagram]
+
+    subgraph Runtime
+        D --> G[Store result]
+        E --> G
+        F --> G
+    end
+
+    G --> H{Dependencies changed?}
+
+    H -->|Yes| I[Re-evaluate dependent cells]
+    I --> G
+
+    H -->|No| J([Done])
+
+    style F fill:#d5f5e3,stroke:#239b56
+    style J fill:#d6eaf8,stroke:#2874a6
