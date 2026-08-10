@@ -1,12 +1,12 @@
 created: 20260805002056296
 list: [[leaflet map/cell]]
-modified: 20260805002719776
+modified: 20260809164344799
 tags: [[example notebook]]
 title: leaflet map
 type: text/vnd.tiddlywiki
 
-Leaflet is built into as the identifier 'L'
+Leaflet is built into notebook-kit as the identifier 'L'
 
-This code os from https://leafletjs.com/examples/quick-start/
+This code is from https://leafletjs.com/examples/quick-start/
 
 {{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}
