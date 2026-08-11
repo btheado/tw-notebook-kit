@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments/4
+type: application/javascript
+
+FileAttachment("file-attachments/logo.svg").image({width: 240})

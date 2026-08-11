@@ -1,0 +1,8 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments/1
+type: text/x-markdown
+
+# Tiddler attachments
+
+`FileAttachment` names a tiddler by its exact title. Its `text` field supplies
+the contents and its `type` field supplies the MIME type. The following cells
+load CSV, JSON, SVG, and base64-encoded text using the usual Observable API.

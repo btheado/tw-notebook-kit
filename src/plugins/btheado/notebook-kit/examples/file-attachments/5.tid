@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments/5
+type: application/javascript
+
+FileAttachment("file-attachments/hello.bin").text()

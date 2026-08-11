@@ -1,0 +1,18 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments
+
+<$testcase>
+  <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
+  <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
+  <$data title=Description text="Notebook Kit FileAttachment values backed by tiddlers"/>
+  <$data title=Output text="""<$notebook-kit>
+<$list filter="[range[5]]">
+<$codeblock code={{!!text}} language={{!!type}} /> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
+</$list>
+</$notebook-kit>"""/>
+<$list filter="[range[5]]" variable=cell>
+  <$data $tiddler={{{ [<currentTiddler>addsuffix[/]addsuffix<cell>] }}} title=<<cell>>/>
+</$list>
+<$list filter="points.csv settings.json logo.svg hello.bin" variable=cell>
+  <$data $tiddler={{{ [<currentTiddler>addsuffix[/]addsuffix<cell>] }}} title={{{ [[file-attachments/]addsuffix<cell>] }}}/>
+</$list>
+</$testcase>

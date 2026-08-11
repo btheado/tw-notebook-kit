@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments/2
+type: application/javascript
+
+FileAttachment("file-attachments/points.csv").csv({typed: true})

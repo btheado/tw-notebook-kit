@@ -1,0 +1,8 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments/settings.json
+type: application/json
+
+{
+  "theme": "glacier",
+  "showLegend": true,
+  "threshold": 0.75
+}

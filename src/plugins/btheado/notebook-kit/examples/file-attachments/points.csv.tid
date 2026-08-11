@@ -1,0 +1,7 @@
+title: $:/plugins/btheado/notebook-kit/examples/file-attachments/points.csv
+type: text/csv
+
+city,population
+Boston,675647
+Providence,190934
+Hartford,120576
