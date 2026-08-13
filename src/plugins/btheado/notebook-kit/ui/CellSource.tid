@@ -1,0 +1,7 @@
+title: $:/plugins/btheado/notebook-kit/ui/CellSource
+
+<%if [[$:/config/NotebookKitPlugin/TypeMappings/]addsuffix{!!type}get[text]] %>
+  <$codeblock code={{{ [<currentTiddler>get[text]] }}} language={{{ [<currentTiddler>get[type]else[text/vnd.tiddlywiki]] }}}/>
+<%else%>
+  {{||$:/core/ui/ViewTemplate/body}}
+<%endif%>
