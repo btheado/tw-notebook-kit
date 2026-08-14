@@ -113,6 +113,98 @@ function attachmentBlob(tiddler) {
 	return new Blob([text], {type: type});
 }
 
+/* A top-level widget owns one Observable runtime. Descendant widgets use a
+   separate Observable module from that runtime, which keeps their notebook
+   names isolated while retaining one shared set of built-ins and attachments. */
+function findParentNotebook(widget) {
+	for(var parent = widget.parentWidget; parent; parent = parent.parentWidget) {
+		if(parent.runtimeContext) return parent;
+	}
+	return null;
+}
+
+function scopedRuntime(notebookRuntime, module) {
+	/* Notebook Kit 2.1.9's instance methods use `this.main` to select the
+	   Observable module. Inherit the remaining NotebookRuntime API, but point
+	   define calls at this nested widget's module. */
+	var facade = Object.create(notebookRuntime);
+	facade.runtime = notebookRuntime.runtime;
+	facade.main = module;
+	return facade;
+}
+
+function resolveTiddlerAttachment(context, title) {
+	var tiddler = context.wiki.getTiddler(title);
+	var previous = context.attachmentUrls.get(title);
+	if(!tiddler) {
+		if(previous) {
+			if(context.kit) context.kit.registerFile(title, null);
+			URL.revokeObjectURL(previous.url);
+			context.attachmentUrls.delete(title);
+		}
+		return null;
+	}
+
+	var fields = tiddler.fields;
+	var text = fields.text || "";
+	var type = fields.type || "application/octet-stream";
+	var encoding = fields.encoding || "";
+	if(!previous || previous.text !== text || previous.type !== type || previous.encoding !== encoding) {
+		if(previous) URL.revokeObjectURL(previous.url);
+		previous = {
+			text: text,
+			type: type,
+			encoding: encoding,
+			url: URL.createObjectURL(attachmentBlob(tiddler))
+		};
+		context.attachmentUrls.set(title, previous);
+	}
+	return {url: previous.url, mimeType: type};
+}
+
+function fileAttachmentForTiddler(context, title) {
+	title += "";
+	var attachment = resolveTiddlerAttachment(context, title);
+	if(!attachment) throw new Error("File not found: " + title);
+	context.kit.registerFile(title, {path: attachment.url, mimeType: attachment.mimeType});
+	return context.kit.FileAttachment(title);
+}
+
+function activateScope(widget) {
+	var context = widget.runtimeContext;
+	if(widget.removed || context.disposed || widget.runtime || !context.notebookRuntime) return;
+	widget.kit = context.kit;
+	widget.runtime = widget.isRuntimeOwner ? context.notebookRuntime :
+		scopedRuntime(context.notebookRuntime, context.notebookRuntime.runtime.module());
+	widget.cells.forEach(function(cell) {
+		widget.evaluateCell(cell);
+	});
+}
+
+function startRuntime(context) {
+	context.ready = loadNotebookKit().then(function(kit) {
+		if(context.disposed) return context;
+		context.kit = kit;
+		var builtins = Object.assign({}, kit.library, {
+			FileAttachment: function() {
+				return function(title) { return fileAttachmentForTiddler(context, title); };
+			}
+		});
+		context.notebookRuntime = new kit.NotebookRuntime(builtins);
+		context.scopes.forEach(activateScope);
+		return context;
+	}).catch(function(error) {
+		context.error = error;
+		console.error("tc-notebook: failed to load Observable Notebook Kit", error);
+		context.scopes.forEach(function(scope) {
+			scope.cells.forEach(function(cell) {
+				scope.showCellError(cell, "Could not load Observable Notebook Kit: " + error.message);
+			});
+		});
+		return context;
+	});
+}
+
 /* ---------------------------------------------------------------------
    Widget
 ------------------------------------------------------------------- */
@@ -143,74 +235,47 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 	this.runtime = null;
 	this.kit = null;
 	this.removed = false;
-	this.attachmentUrls = new Map(); // title -> {text, type, encoding, url}
+
+	var parentNotebook = findParentNotebook(this);
+	if(parentNotebook) {
+		this.runtimeContext = parentNotebook.runtimeContext;
+		this.isRuntimeOwner = false;
+	} else {
+		this.runtimeContext = {
+			wiki: this.wiki,
+			scopes: new Set(),
+			attachmentUrls: new Map(), // title -> {text, type, encoding, url}
+			kit: null,
+			notebookRuntime: null,
+			ready: null,
+			disposed: false,
+			error: null
+		};
+		this.isRuntimeOwner = true;
+	}
+	this.runtimeContext.scopes.add(this);
 
 	this.renderChildren(this.notebookRoot, null);
 	this.reconcileCells();
 
-	var self = this;
-	loadNotebookKit().then(function(kit) {
-		if(self.removed) return;
-		self.kit = kit;
-		// NotebookRuntime replaces (rather than augments) its default library
-		// when passed built-ins, so copy it before overriding FileAttachment.
-		// Library entries are zero-argument providers; the provider must return
-		// the FileAttachment function rather than being that function itself.
-		var builtins = Object.assign({}, kit.library, {
-			FileAttachment: function() {
-				return function(title) { return self.fileAttachmentForTiddler(title); };
-			}
-		});
-		self.runtime = new kit.NotebookRuntime(builtins);
-		self.cells.forEach(function(cell) {
-			self.evaluateCell(cell);
-		});
-	}).catch(function(error) {
-		console.error("tc-notebook: failed to load Observable Notebook Kit", error);
-		self.cells.forEach(function(cell) {
-			self.showCellError(cell, "Could not load Observable Notebook Kit: " + error.message);
-		});
-	});
+	if(this.isRuntimeOwner) {
+		startRuntime(this.runtimeContext);
+	} else if(this.runtimeContext.error) {
+		var error = this.runtimeContext.error;
+		this.cells.forEach(function(cell) {
+			this.showCellError(cell, "Could not load Observable Notebook Kit: " + error.message);
+		}.bind(this));
+	} else if(this.runtimeContext.ready) {
+		this.runtimeContext.ready.then(function() { activateScope(this); }.bind(this));
+	}
 };
 
 NotebookWidget.prototype.resolveTiddlerAttachment = function(title) {
-	var tiddler = this.wiki.getTiddler(title);
-	var previous = this.attachmentUrls.get(title);
-	if(!tiddler) {
-		if(previous) {
-			if(this.kit) this.kit.registerFile(title, null);
-			URL.revokeObjectURL(previous.url);
-			this.attachmentUrls.delete(title);
-		}
-		return null;
-	}
-
-	var fields = tiddler.fields;
-	var text = fields.text || "";
-	var type = fields.type || "application/octet-stream";
-	var encoding = fields.encoding || "";
-	if(!previous || previous.text !== text || previous.type !== type || previous.encoding !== encoding) {
-		if(previous) URL.revokeObjectURL(previous.url);
-		previous = {
-			text: text,
-			type: type,
-			encoding: encoding,
-			url: URL.createObjectURL(attachmentBlob(tiddler))
-		};
-		this.attachmentUrls.set(title, previous);
-	}
-	return {url: previous.url, mimeType: type};
+	return resolveTiddlerAttachment(this.runtimeContext, title);
 };
 
 NotebookWidget.prototype.fileAttachmentForTiddler = function(title) {
-	title += "";
-	var attachment = this.resolveTiddlerAttachment(title);
-	if(!attachment) throw new Error("File not found: " + title);
-	/* The browser bundle does not export the fileAttachments helper from its
-	   TypeScript source. registerFile + FileAttachment is its equivalent public
-	   path: register our Blob URL, then create the standard file handle. */
-	this.kit.registerFile(title, {path: attachment.url, mimeType: attachment.mimeType});
-	return this.kit.FileAttachment(title);
+	return fileAttachmentForTiddler(this.runtimeContext, title);
 };
 
 NotebookWidget.prototype.execute = function() {
@@ -226,7 +291,13 @@ NotebookWidget.prototype.findHostElements = function() {
 	var root = this.notebookRoot;
 	var results = Array.prototype.slice.call(root.querySelectorAll(selector));
 	if(root.matches && root.matches(selector)) results.unshift(root);
-	return results;
+	// A parent notebook's DOM contains every nested notebook's hosts. Only the
+	// nearest notebook root owns a host, otherwise parents would define child
+	// cells in the wrong Observable module.
+	return results.filter(function(host) {
+		var owner = host.closest ? host.closest(".tc-notebook-widget") : null;
+		return owner === root;
+	});
 };
 
 NotebookWidget.prototype.reconcileCells = function() {
@@ -370,18 +441,20 @@ NotebookWidget.prototype.reevaluateChangedCells = function(changedTiddlers) {
    tiddler that was previously requested as an attachment changes, discard its
    Blob URL and re-run the notebook so consumers fetch the new contents. */
 NotebookWidget.prototype.reevaluateChangedAttachments = function(changedTiddlers) {
-	var self = this;
+	var context = this.runtimeContext;
+	if(!context || !context.kit) return false;
 	var changed = Object.keys(changedTiddlers).some(function(title) {
-		var attachment = self.attachmentUrls.get(title);
+		var attachment = context.attachmentUrls.get(title);
 		if(!attachment) return false;
-		self.kit.registerFile(title, null);
+		context.kit.registerFile(title, null);
 		URL.revokeObjectURL(attachment.url);
-		self.attachmentUrls.delete(title);
+		context.attachmentUrls.delete(title);
 		return true;
 	});
 	if(changed) {
-		this.cells.forEach(function(cell) {
-			self.evaluateCell(cell);
+		context.scopes.forEach(function(scope) {
+			if(scope.removed) return;
+			scope.cells.forEach(function(cell) { scope.evaluateCell(cell); });
 		});
 	}
 	return changed;
@@ -409,15 +482,27 @@ NotebookWidget.prototype.destroy = function() {
 		this.cells.forEach(function(cell) { self.disposeCell(cell); });
 		this.cells.clear();
 	}
-	if(this.runtime && this.runtime.dispose) {
-		this.runtime.dispose();
-	}
-	if(this.attachmentUrls) {
-		this.attachmentUrls.forEach(function(attachment, title) {
-			if(self.kit) self.kit.registerFile(title, null);
-			URL.revokeObjectURL(attachment.url);
-		});
-		this.attachmentUrls.clear();
+	if(this.runtimeContext) {
+		if(this.isRuntimeOwner && !this.runtimeContext.disposed) {
+			this.runtimeContext.disposed = true;
+			this.runtimeContext.scopes.forEach(function(scope) {
+				if(scope === self) return;
+				scope.removed = true;
+				scope.cells.forEach(function(cell) { scope.disposeCell(cell); });
+				scope.cells.clear();
+			});
+			if(this.runtimeContext.notebookRuntime && this.runtimeContext.notebookRuntime.dispose) {
+				this.runtimeContext.notebookRuntime.dispose();
+			}
+			this.runtimeContext.attachmentUrls.forEach(function(attachment, title) {
+				if(self.runtimeContext.kit) self.runtimeContext.kit.registerFile(title, null);
+				URL.revokeObjectURL(attachment.url);
+			});
+			this.runtimeContext.attachmentUrls.clear();
+			this.runtimeContext.scopes.clear();
+		} else if(!this.isRuntimeOwner) {
+			this.runtimeContext.scopes.delete(this);
+		}
 	}
 	if(Widget.prototype.destroy) {
 		Widget.prototype.destroy.call(this);

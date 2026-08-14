@@ -1,0 +1,21 @@
+title: $:/plugins/btheado/notebook-kit/examples/nested-modules
+
+<$testcase>
+  <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
+  <$data title="Parent cell" type="application/javascript" text=`const duplicate = "parent";
+display("parent module: " + duplicate);`/>
+  <$data title="Child cell" type="application/javascript" text=`const duplicate = "child";
+display("child module: " + duplicate);`/>
+  <$data title=ChildNotebook text="""<$notebook-kit>
+  <div class="tc-notebook-output" data-tiddler-title="Child cell"/>
+</$notebook-kit>"""/>
+  <$data title=Output text="""<$notebook-kit>
+  <div class="tc-notebook-output" data-tiddler-title="Parent cell"/>
+  <$transclude tiddler=ChildNotebook/>
+  <$transclude tiddler=ChildNotebook/>
+</$notebook-kit>"""/>
+</$testcase>
+
+This parent notebook and both inline child instances define `duplicate`. Each
+child receives its own Observable module, so all three outputs render without
+duplicate-name errors.
