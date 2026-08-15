@@ -1,0 +1,6 @@
+created: 20260815182027291
+modified: 20260815183708779
+title: callbag/cell 14
+type: text/vnd.tiddlywiki
+
+`fromEvent` callbag source feeds dom events into the pipeline. Click on various places to see the coordinate display update:

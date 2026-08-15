@@ -1,0 +1,11 @@
+created: 20260814212736562
+modified: 20260815183533028
+title: callbag/cell 4
+type: text/vnd.tiddlywiki
+
+Callbag is a fun set of libraries in a similar vein to [[RxJS|https://rxjs.dev/]]
+
+*https://github.com/callbag/callbag
+*https://blog.krawaller.se/posts/callbags-introduction/
+*https://staltz.com/why-we-need-callbags.html
+*https://github.com/callbag/callbag/wiki

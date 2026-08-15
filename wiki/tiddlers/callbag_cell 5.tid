@@ -1,0 +1,8 @@
+created: 20260814212820762
+modified: 20260815183218378
+title: callbag/cell 5
+type: text/vnd.tiddlywiki
+
+The callbag sink function [[toAsyncIterable|https://github.com/staltz/callbag-to-async-iterable]] returns an async iterable which works well as a return value for notebook-kit cells.
+
+Here the values are dropped for the first 6 seconds and the remaining values are emitted:

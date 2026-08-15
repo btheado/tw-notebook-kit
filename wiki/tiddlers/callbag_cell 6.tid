@@ -1,0 +1,6 @@
+created: 20260814213007505
+modified: 20260814213045775
+title: callbag/cell 6
+type: text/vnd.tiddlywiki
+
+The [[toIterable sink|https://github.com/staltz/callbag-to-iterable]] can be used with `Array.from` to accumulate all the values of the callback pipeline

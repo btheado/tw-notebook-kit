@@ -1,0 +1,8 @@
+created: 20260815173002015
+modified: 20260815183307443
+title: callbag/cell 13
+type: text/vnd.tiddlywiki
+
+Here a callbag value is persisted into the tiddler [[$:/temp/t1]]
+
+{{$:/temp/t1}}

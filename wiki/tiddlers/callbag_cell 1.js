@@ -1,0 +1,1 @@
+pipe(range(2, 100), toAsyncIterable)

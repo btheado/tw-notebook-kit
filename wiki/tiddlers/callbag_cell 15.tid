@@ -1,0 +1,6 @@
+created: 20260815182731660
+modified: 20260815182827111
+title: callbag/cell 15
+type: text/vnd.tiddlywiki
+
+`fromTwFilter` is an easier to use wrapper explicitly tied to "change" event and `filterTiddlers`

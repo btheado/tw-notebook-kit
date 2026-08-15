@@ -1,0 +1,6 @@
+created: 20260815182448773
+modified: 20260815182618952
+title: callbag/cell 10
+type: text/vnd.tiddlywiki
+
+`fromWikiEvent` will emit a value after the given event triggers
