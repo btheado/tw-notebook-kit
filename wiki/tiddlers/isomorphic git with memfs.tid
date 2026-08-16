@@ -1,0 +1,14 @@
+created: 20260816000000000
+list: [[isomorphic git with memfs/cell 1]] [[isomorphic git with memfs/cell]] [[isomorphic git with memfs/cell 3]] [[isomorphic git with memfs/cell 2]] [[isomorphic git with memfs/cell 12]] [[isomorphic git with memfs/cell 4]] [[isomorphic git with memfs/cell 7]] [[isomorphic git with memfs/cell 5]] [[isomorphic git with memfs/cell 6]] [[isomorphic git with memfs/cell 10]] [[isomorphic git with memfs/cell 13]] [[isomorphic git with memfs/cell 8]] [[isomorphic git with memfs/cell 14]] [[isomorphic git with memfs/cell 9]] [[isomorphic git with memfs/cell 15]] [[isomorphic git with memfs/cell 11]] observeMemfs
+modified: 20260816182755944
+tags: [[example notebook]]
+title: isomorphic git with memfs
+type: text/vnd.tiddlywiki
+
+This notebook creates a Git repository entirely in browser memory. It uses [[isomorphic-git|https://isomorphic-git.org/]] with [[memfs|https://github.com/streamich/memfs]] rather than LightningFS: `memfs` supplies the Node-compatible `fs` API isomorphic-git expects, while a new volume makes every run isolated and disposable.
+
+The setup cells initialize the repository, create and stage two files, and make an initial commit. Then use the buttons to create an untracked random file, append a line to the tracked `notebook-files/notes.txt`, or stage and commit all working-tree changes. No repository is cloned and no remote is contacted.
+
+`memfs` file events provide the reactive value that drives the live filesystem and status displays below. The watcher is restricted to `notebook-files/`, avoiding a feedback loop from isomorphic-git's `.git` writes. The filesystem display shows the current `volume.toJSON()` value, the status display distinguishes the untracked random files from the modified notes file, and the commit-history display uses isomorphic-git's `git.log()` API.
+
+{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}

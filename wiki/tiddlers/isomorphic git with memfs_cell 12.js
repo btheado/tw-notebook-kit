@@ -1,0 +1,1 @@
+html`<h2>Git status and commit log</h2>${statusTable} ${logTable}`
