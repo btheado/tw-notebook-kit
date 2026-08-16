@@ -1,0 +1,1 @@
+const fileEvents = display(observeMemfs(fs, watchDir));

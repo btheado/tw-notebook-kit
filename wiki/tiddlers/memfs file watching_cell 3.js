@@ -1,0 +1,1 @@
+observeMemfs(fs, watchDir)

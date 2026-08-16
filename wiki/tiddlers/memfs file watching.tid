@@ -1,0 +1,12 @@
+created: 20260816000000000
+list: [[memfs file watching/cell]] [[memfs file watching/cell 1]] [[memfs file watching/cell 3]] [[memfs file watching/cell 4]] [[memfs file watching/cell 8]] [[memfs file watching/cell 7]] [[memfs file watching/cell 5]] [[memfs file watching/cell 6]] observeMemfs
+modified: 20260816170858688
+tags: [[example notebook]]
+title: memfs file watching
+type: text/vnd.tiddlywiki
+
+This is a standalone example of connecting memfs file watching to Notebook Kit reactivity. observeMemfs follows the same Generators.observe pattern as [[observeTwFilter]]: it publishes the initial ready state, forwards each fs.watch callback, and closes the watcher when Notebook Kit disposes the cell.
+
+The automatic write cell writes one file only after the watcher publishes its initial ready value. The buttons below then create a random file or append a dated line to notes.txt. Watcher events refresh the directory listing, but never trigger either write cell, preventing a feedback loop. For a Git repository, watch a user-facing directory or individual file rather than the whole repository: Git writes many files below .git.
+
+{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}
