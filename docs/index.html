@@ -296,6 +296,24 @@ Error message and password prompt
 
 <li>observeTwFilter</li>
 
+<li>sql database</li>
+
+<li>sql database/cell</li>
+
+<li>sql database/cell 1</li>
+
+<li>sql database/cell 2</li>
+
+<li>sql database/cell 3</li>
+
+<li>sql database/cell 4</li>
+
+<li>sql database/cell 5</li>
+
+<li>sql database/cell 6</li>
+
+<li>sql database/cell 7</li>
+
 <li>tiddlywiki filter</li>
 
 <li>tiddlywiki filter/cell</li>
@@ -388,6 +406,15 @@ Error message and password prompt
 {"title":"memfs file watching/cell 8","text":"const fileRows = await Promise.all(directoryListing.files.map(async filename => ({\n  filename,\n  contents: await pfs.readFile(watchDir + '/' + filename, 'utf8')\n})));\n\nconst fileTable = html`\u003Ctable>\n  \u003Cthead>\n    \u003Ctr>\u003Cth>Filename\u003C/th>\u003Cth>Contents\u003C/th>\u003C/tr>\n  \u003C/thead>\n  \u003Ctbody>\u003C/tbody>\u003C/table>`;\n\nconst tbody = fileTable.querySelector('tbody');\nfor(const {filename, contents} of fileRows) {\n  const row = document.createElement('tr');\n  const filenameCell = document.createElement('td');\n  const contentsCell = document.createElement('td');\n  const pre = document.createElement('pre');\n\n  filenameCell.textContent = filename;\n  pre.textContent = contents;\n  contentsCell.append(pre);\n  row.append(filenameCell, contentsCell);\n  tbody.append(row);\n}\n\ndisplay(fileTable);\n","created":"20260816000000000","modified":"20260816000000000","type":"application/javascript"},
 {"title":"observeMemfs","text":"// Turn Node-style memfs watch events into an Observable value.\nconst observeMemfs = (fs, path, options = {}) => Generators.observe(change => {\n  const watcher = fs.watch(path, options, (eventType, filename) => {\n    change({\n      eventType,\n      filename: filename ? String(filename) : null,\n      time: new Date().toISOString()\n    });\n  });\n\n  change({eventType: 'ready', filename: path, time: new Date().toISOString()});\n  return () => watcher.close();\n});\n","created":"20260816000000000","modified":"20260816000000000","type":"application/javascript"},
 {"title":"observeTwFilter","text":"// Generator function which reruns the given filter after every tiddlywiki change event\nconst observeTwFilter = filter => {\n  return Generators.observe(change => {\n    const publish = () => change($tw.wiki.filterTiddlers(filter));\n    $tw.wiki.addEventListener(\"change\",publish);\n    publish();\n    return () => $tw.wiki.removeEventListener(\"change\", publish);\n  });\n}","created":"20260804222953623","modified":"20260805214545134","type":"application/javascript"},
+{"title":"sql database","created":"20260816193143220","list":"[[sql database/cell]] [[sql database/cell 7]] [[sql database/cell 1]] [[sql database/cell 3]] [[sql database/cell 2]] [[sql database/cell 4]] [[sql database/cell 5]] [[sql database/cell 6]]","modified":"20260816213853174","tags":"[[example notebook]]","type":"text/vnd.tiddlywiki","text":"{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}"},
+{"title":"sql database/cell","created":"20260816213024624","modified":"20260816213437238","type":"text/vnd.tiddlywiki","text":"!! duckdb client is builtin\n\nNotebook-kit provides `DuckDBClient` for creating [[duckdb|https://duckdb.org]] databases (similar to sqlite).\n\nNotebook-kit also provides builtin dataset names. Here 3 of them are used (`cars`, `olympians`, and `penguins`) to create some tables. In addition a `test` table is created using a static array of javascript objects."},
+{"title":"sql database/cell 1","text":"Inputs.table(db.sql`select * from test`)","created":"20260816194108712","modified":"20260816213845118","type":"application/javascript"},
+{"title":"sql database/cell 2","text":"db.describeTables()","created":"20260816194905062","modified":"20260816213853174","type":"application/javascript"},
+{"title":"sql database/cell 3","text":"// query output can be converted to a javascript array of rows. Rows have\n// a `toJSON` method\n(await db.query(\"select * from test\")).toArray().map(row => row.toJSON())","created":"20260816195401017","modified":"20260816213822601","type":"application/javascript"},
+{"title":"sql database/cell 4","text":"Inputs.table(db.sql`select * from cars`)","created":"20260816212423299","modified":"20260816213836327","type":"application/javascript"},
+{"title":"sql database/cell 5","text":"Inputs.table(db.sql`select nationality, count(*) as count from olympians group by nationality`)","created":"20260816212604141","modified":"20260816213829198","type":"application/javascript"},
+{"title":"sql database/cell 6","text":"Inputs.table(db.sql`select species, sex, count(*) as count from penguins group by species, sex`)","created":"20260816212759711","modified":"20260816213814431","type":"application/javascript"},
+{"title":"sql database/cell 7","text":"const db = display(await DuckDBClient.of({\n  cars, olympians, penguins,\n  test: [{a: 1, b: 2}, {a: 3, b: 4}]\n}));","created":"20260816193203140","modified":"20260816213805207","type":"application/javascript"},
 {"title":"tiddlywiki filter","created":"20260805000351596","list":"[[tiddlywiki filter/cell]] observeTwFilter","modified":"20260805214726581","tags":"[[example notebook]]","type":"text/vnd.tiddlywiki","text":"Calling `$tw.wiki.filterTiddlers` from a notebook cell will return a snapshot of the filter results and it won't update unless the notebook tiddler is refreshed. This example uses `notebook-kit`'s `Generators.observe` to glue the two reactivity systems together.\n\n{{||$:/plugins/btheado/notebook-kit/ui/NotebookStoryTemplate}}"},
 {"title":"tiddlywiki filter/cell","text":"observeTwFilter(\"[has[modified]!sort[modified]limit[10]]\")","created":"20260805000536814","modified":"20260805214328685","type":"application/javascript"}
 ]</script><div id="storeArea" style="display:none;"></div>
