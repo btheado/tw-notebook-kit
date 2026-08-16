@@ -1,0 +1,10 @@
+created: 20260816213024624
+modified: 20260816213437238
+title: sql database/cell
+type: text/vnd.tiddlywiki
+
+!! duckdb client is builtin
+
+Notebook-kit provides `DuckDBClient` for creating [[duckdb|https://duckdb.org]] databases (similar to sqlite).
+
+Notebook-kit also provides builtin dataset names. Here 3 of them are used (`cars`, `olympians`, and `penguins`) to create some tables. In addition a `test` table is created using a static array of javascript objects.

@@ -1,0 +1,1 @@
+Inputs.table(db.sql`select species, sex, count(*) as count from penguins group by species, sex`)

@@ -1,0 +1,1 @@
+Inputs.table(db.sql`select * from test`)

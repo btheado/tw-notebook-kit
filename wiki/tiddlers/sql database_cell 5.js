@@ -1,0 +1,1 @@
+Inputs.table(db.sql`select nationality, count(*) as count from olympians group by nationality`)
