@@ -1,4 +1,4 @@
-const commits = await (commitResult, git.log({...repo, depth: 10}));
+const commits = await (committed, commitResult, git.log({...repo, depth: 10}));
 
 const logTable = html`<table>
   <thead><tr><th>Commit</th><th>Message</th><th>Author</th><th>Date</th></tr></thead>
