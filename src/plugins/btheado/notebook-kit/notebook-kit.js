@@ -57,15 +57,16 @@ var notebookKitPromise = null;
 function loadNotebookKit() {
 	if(!notebookKitPromise) {
 		notebookKitPromise = Promise.all([
-			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.9/runtime/+esm"),
-			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.9/+esm")
+			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.4.1/runtime/+esm"),
+			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.4.1/+esm")
 		]).then(function(modules) {
 			return {
 				NotebookRuntime: modules[0].NotebookRuntime,
 				FileAttachment: modules[0].FileAttachment,
 				registerFile: modules[0].registerFile,
 				library: modules[0].library,
-				transpile: modules[1].transpile
+				transpile: modules[1].transpile,
+				resolveImportDefault: modules[1].resolveImportDefault
 			};
 		});
 	}
@@ -170,6 +171,33 @@ function fileAttachmentForTiddler(context, title) {
 	return context.kit.FileAttachment(title);
 }
 
+/* JavaScript tiddlers can be imported as ES modules with a tw: prefix. Like
+   attachments, their text is exposed through a revision-aware Blob URL. The
+   prefix deliberately leaves ordinary imports to Notebook Kit's resolver. */
+function resolveTiddlerModule(context, title) {
+	var tiddler = context.wiki.getTiddler(title);
+	if(!tiddler) throw new Error("Tiddler module not found: " + title);
+
+	var text = tiddler.fields.text || "";
+	var previous = context.moduleUrls.get(title);
+	if(!previous || previous.text !== text) {
+		if(previous) URL.revokeObjectURL(previous.url);
+		previous = {
+			text: text,
+			url: URL.createObjectURL(new Blob([text], {type: "text/javascript"}))
+		};
+		context.moduleUrls.set(title, previous);
+	}
+	return previous.url;
+}
+
+function resolveNotebookImport(context, specifier) {
+	if(specifier.indexOf("tw:") === 0) {
+		return resolveTiddlerModule(context, specifier.slice(3));
+	}
+	return context.kit.resolveImportDefault(specifier);
+}
+
 function activateScope(widget) {
 	var context = widget.runtimeContext;
 	if(widget.removed || context.disposed || widget.runtime || !context.notebookRuntime) return;
@@ -245,6 +273,7 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 			wiki: this.wiki,
 			scopes: new Set(),
 			attachmentUrls: new Map(), // title -> {text, type, encoding, url}
+			moduleUrls: new Map(), // title -> {text, url}
 			kit: null,
 			notebookRuntime: null,
 			ready: null,
@@ -382,7 +411,11 @@ NotebookWidget.prototype.evaluateCell = function(cell) {
 	}
 
 	try {
-		var transpiled = this.kit.transpile(text, mode);
+		var transpiled = this.kit.transpile(text, mode, {
+			resolveImport: function(specifier) {
+				return resolveNotebookImport(this.runtimeContext, specifier);
+			}.bind(this)
+		});
 		var definition = Object.assign({}, transpiled, {
 			id: cell.title,
 			body: eval.call(null, transpiled.body)
@@ -460,6 +493,28 @@ NotebookWidget.prototype.reevaluateChangedAttachments = function(changedTiddlers
 	return changed;
 };
 
+/* Imports have no dependency edge back to their source tiddler. When a used
+   tiddler module changes, discard its Blob URL and re-run all cells so their
+   imports receive the revised module URL. */
+NotebookWidget.prototype.reevaluateChangedModules = function(changedTiddlers) {
+	var context = this.runtimeContext;
+	if(!context) return false;
+	var changed = Object.keys(changedTiddlers).some(function(title) {
+		var module = context.moduleUrls.get(title);
+		if(!module) return false;
+		URL.revokeObjectURL(module.url);
+		context.moduleUrls.delete(title);
+		return true;
+	});
+	if(changed) {
+		context.scopes.forEach(function(scope) {
+			if(scope.removed) return;
+			scope.cells.forEach(function(cell) { scope.evaluateCell(cell); });
+		});
+	}
+	return changed;
+};
+
 NotebookWidget.prototype.refresh = function(changedTiddlers) {
 	var changedAttributes = this.computeAttributes();
 	if(changedAttributes.outputSelector || changedAttributes.titleAttribute) {
@@ -470,9 +525,10 @@ NotebookWidget.prototype.refresh = function(changedTiddlers) {
 	var childrenRefreshed = this.refreshChildren(changedTiddlers);
 	var cellsChanged = this.reconcileCells();
 	var attachmentsReevaluated = this.reevaluateChangedAttachments(changedTiddlers);
+	var modulesReevaluated = this.reevaluateChangedModules(changedTiddlers);
 	var reevaluated = this.reevaluateChangedCells(changedTiddlers);
 
-	return !!(childrenRefreshed || cellsChanged || attachmentsReevaluated || reevaluated);
+	return !!(childrenRefreshed || cellsChanged || attachmentsReevaluated || modulesReevaluated || reevaluated);
 };
 
 NotebookWidget.prototype.destroy = function() {
@@ -499,6 +555,10 @@ NotebookWidget.prototype.destroy = function() {
 				URL.revokeObjectURL(attachment.url);
 			});
 			this.runtimeContext.attachmentUrls.clear();
+			this.runtimeContext.moduleUrls.forEach(function(module) {
+				URL.revokeObjectURL(module.url);
+			});
+			this.runtimeContext.moduleUrls.clear();
 			this.runtimeContext.scopes.clear();
 		} else if(!this.isRuntimeOwner) {
 			this.runtimeContext.scopes.delete(this);

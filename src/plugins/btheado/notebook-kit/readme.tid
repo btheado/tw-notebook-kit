@@ -67,6 +67,30 @@ Notebook Kit itself has loaded and do not expose a network endpoint.
 When an already-used attachment tiddler changes, the notebook re-runs so
 dependent cells read the new contents.
 
+!! Tiddler JavaScript modules
+
+JavaScript tiddlers can be imported as ES modules with the `tw:` prefix. The
+text field of the named tiddler is used as the module source, so it must use
+standard ES module exports:
+
+```js
+// tiddler title: my-library
+export function greeting(name) {
+  return `Hello, ${name}!`;
+}
+```
+
+```js
+import {greeting} from "tw:my-library";
+display(greeting("Ada"));
+```
+
+Other import specifiers, including `npm:` and HTTPS URLs, continue to use
+Notebook Kit's default resolver. When an imported tiddler changes, notebook
+cells are re-evaluated. Imported tiddler modules should currently be
+self-contained: imports inside a `tw:` module are handled by the browser and
+are not themselves rewritten by Notebook Kit.
+
 !! Notes
 
 I highly recommend installing the Codemirror and Highlight plugins. Their syntax
