@@ -65,6 +65,7 @@ function loadNotebookKit() {
 				FileAttachment: modules[0].FileAttachment,
 				registerFile: modules[0].registerFile,
 				library: modules[0].library,
+				parseJavaScript: modules[1].parseJavaScript,
 				transpile: modules[1].transpile,
 				resolveImportDefault: modules[1].resolveImportDefault
 			};
@@ -96,6 +97,44 @@ function dispose(variable) {
 function clearCellVariables(cell) {
 	(cell.variables || []).forEach(dispose);
 	cell.variables = [];
+}
+
+var NOTEBOOK_IMPORT_PREFIX = "tw-notebook:";
+var OBSERVABLE_NOTEBOOK_IMPORT_PREFIX = "observable:" + NOTEBOOK_IMPORT_PREFIX;
+var NOTEBOOK_DEFINITION_REGISTRY_KEY = "$:/plugins/btheado/notebook-kit/notebook-definitions";
+var nextNotebookDefinitionId = 1;
+
+/* Notebook Kit already knows how to turn Observable notebook imports into
+   Observable Runtime module.import calls. JavaScript and TypeScript imports
+   need to opt into that path, so rewrite only the source literal of static
+   tw-notebook imports before transpiling. Observable JavaScript import cells
+   are marked as Observable imports by Notebook Kit itself. */
+function rewriteNotebookImportDeclarations(kit, text, mode) {
+	if((mode !== "js" && mode !== "ts") || text.indexOf(NOTEBOOK_IMPORT_PREFIX) < 0) return text;
+	var parsed = kit.parseJavaScript(text, mode === "ts" ? "ts" : "js");
+	if(!parsed.body || parsed.body.type !== "Program") return text;
+	var replacements = [];
+	parsed.body.body.forEach(function(node) {
+		if(node.type !== "ImportDeclaration" || !node.source ||
+			typeof node.source.value !== "string" ||
+			node.source.value.indexOf(NOTEBOOK_IMPORT_PREFIX) !== 0) return;
+		replacements.push({
+			start: node.source.start,
+			end: node.source.end,
+			value: JSON.stringify("observable:" + node.source.value)
+		});
+	});
+	replacements.sort(function(a, b) { return b.start - a.start; });
+	replacements.forEach(function(replacement) {
+		text = text.slice(0, replacement.start) + replacement.value + text.slice(replacement.end);
+	});
+	return text;
+}
+
+function notebookDefinitionRegistry() {
+	var key = Symbol.for(NOTEBOOK_DEFINITION_REGISTRY_KEY);
+	if(!globalThis[key]) globalThis[key] = new Map();
+	return globalThis[key];
 }
 
 /* FileAttachment expects a synchronous name-to-URL resolver. Tiddlers have
@@ -191,11 +230,137 @@ function resolveTiddlerModule(context, title) {
 	return previous.url;
 }
 
-function resolveNotebookImport(context, specifier) {
+function createCellRecord(widget, title, hidden) {
+	var cell = {
+		title: title,
+		root: widget.document.createElement("div"),
+		variables: [],
+		notebookImports: new Set(),
+		lastType: null,
+		lastText: null,
+		lastMode: null,
+		hidden: !!hidden
+	};
+	cell.root.className = hidden ? "tc-notebook-import-output" :
+		"tc-notebook-output-content tc-notebook-output-loading";
+	if(!hidden) cell.root.textContent = "Loading notebook runtime…";
+	return cell;
+}
+
+function createImportedNotebook(widget, filter) {
+	var context = widget.runtimeContext;
+	var registry = notebookDefinitionRegistry();
+	var id = NOTEBOOK_DEFINITION_REGISTRY_KEY + "/" + Date.now() + "/" + nextNotebookDefinitionId++;
+	var record = {
+		widget: widget,
+		filter: filter,
+		id: id,
+		url: null,
+		define: null,
+		runtime: null,
+		cells: new Map(),
+		users: new Set(),
+		disposed: false
+	};
+	record.define = function(runtime) {
+		if(record.disposed) throw new Error("Imported notebook has been disposed");
+		var module = runtime.module();
+		record.runtime = scopedRuntime(context.notebookRuntime, module);
+		reconcileImportedNotebook(record);
+		return module;
+	};
+	registry.set(id, record.define);
+	record.url = URL.createObjectURL(new Blob([
+		"const registry = globalThis[Symbol.for(" + JSON.stringify(NOTEBOOK_DEFINITION_REGISTRY_KEY) + ")];\n",
+		"const define = registry && registry.get(" + JSON.stringify(id) + ");\n",
+		"if (!define) throw new Error('TiddlyWiki notebook import is no longer available');\n",
+		"export default define;\n"
+	], {type: "text/javascript"}));
+	widget.importedNotebooks.set(filter, record);
+	return record;
+}
+
+function importedNotebookForFilter(widget, filter) {
+	var record = widget.importedNotebooks.get(filter);
+	return record && !record.disposed ? record : createImportedNotebook(widget, filter);
+}
+
+function disposeImportedNotebook(record) {
+	if(record.disposed) return;
+	record.disposed = true;
+	Array.from(record.cells.values()).forEach(function(cell) {
+		record.widget.disposeCell(cell);
+	});
+	record.cells.clear();
+	notebookDefinitionRegistry().delete(record.id);
+	if(record.url) URL.revokeObjectURL(record.url);
+	if(record.widget.importedNotebooks.get(record.filter) === record) {
+		record.widget.importedNotebooks.delete(record.filter);
+	}
+}
+
+function updateCellNotebookImports(cell, imports) {
+	(cell.notebookImports || new Set()).forEach(function(record) {
+		if(imports.has(record)) return;
+		record.users.delete(cell);
+		if(record.users.size === 0) disposeImportedNotebook(record);
+	});
+	imports.forEach(function(record) { record.users.add(cell); });
+	cell.notebookImports = imports;
+}
+
+function resolveNotebookImport(widget, imports, specifier) {
+	var context = widget.runtimeContext;
+	var filter;
+	if(specifier.indexOf(OBSERVABLE_NOTEBOOK_IMPORT_PREFIX) === 0) {
+		filter = specifier.slice(OBSERVABLE_NOTEBOOK_IMPORT_PREFIX.length);
+	} else if(specifier.indexOf(NOTEBOOK_IMPORT_PREFIX) === 0) {
+		filter = specifier.slice(NOTEBOOK_IMPORT_PREFIX.length);
+	}
+	if(filter !== undefined) {
+		var record = importedNotebookForFilter(widget, filter);
+		imports.add(record);
+		return record.url;
+	}
 	if(specifier.indexOf("tw:") === 0) {
 		return resolveTiddlerModule(context, specifier.slice(3));
 	}
 	return context.kit.resolveImportDefault(specifier);
+}
+
+function reconcileImportedNotebook(record) {
+	if(record.disposed || !record.runtime) return false;
+	var widget = record.widget;
+	var titles = widget.wiki.filterTiddlers(record.filter, widget);
+	var titlesPresent = new Set(titles);
+	var changed = false;
+
+	record.cells.forEach(function(cell, title) {
+		if(titlesPresent.has(title)) return;
+		widget.disposeCell(cell);
+		record.cells.delete(title);
+		changed = true;
+	});
+
+	titles.forEach(function(title) {
+		var cell = record.cells.get(title);
+		if(!cell) {
+			cell = createCellRecord(widget, title, true);
+			record.cells.set(title, cell);
+			widget.evaluateCellInRuntime(cell, record.runtime);
+			changed = true;
+			return;
+		}
+		var tiddler = widget.wiki.getTiddler(title);
+		var text = (tiddler && tiddler.fields.text) || "";
+		var type = tiddler && tiddler.fields.type;
+		var mode = modeForTiddler(widget.wiki, tiddler);
+		if(text !== cell.lastText || type !== cell.lastType || mode !== cell.lastMode) {
+			widget.evaluateCellInRuntime(cell, record.runtime);
+			changed = true;
+		}
+	});
+	return changed;
 }
 
 function activateScope(widget) {
@@ -260,6 +425,7 @@ NotebookWidget.prototype.render = function(parent, nextSibling) {
 	this.domNodes.push(this.notebookRoot);
 
 	this.cells = new Map(); // title -> cell record, persistent for widget lifetime
+	this.importedNotebooks = new Map(); // filter -> hidden Observable module
 	this.runtime = null;
 	this.kit = null;
 	this.removed = false;
@@ -368,16 +534,7 @@ NotebookWidget.prototype.attachOutput = function(cell, host) {
 };
 
 NotebookWidget.prototype.createCell = function(title) {
-	var cell = {
-		title: title,
-		root: this.document.createElement("div"),
-		variables: [],
-		lastType: null,
-		lastText: null,
-		lastMode: null
-	};
-	cell.root.className = "tc-notebook-output-content tc-notebook-output-loading";
-	cell.root.textContent = "Loading notebook runtime…";
+	var cell = createCellRecord(this, title, false);
 
 	if(this.runtime && this.kit) this.evaluateCell(cell);
 
@@ -390,6 +547,10 @@ NotebookWidget.prototype.showCellError = function(cell, message) {
 };
 
 NotebookWidget.prototype.evaluateCell = function(cell) {
+	this.evaluateCellInRuntime(cell, this.runtime);
+};
+
+NotebookWidget.prototype.evaluateCellInRuntime = function(cell, runtime) {
 	var tiddler = this.wiki.getTiddler(cell.title);
 	var text = (tiddler && tiddler.fields.text) || "";
 	var mode = modeForTiddler(this.wiki, tiddler);
@@ -398,37 +559,42 @@ NotebookWidget.prototype.evaluateCell = function(cell) {
 	cell.lastText = text;
 	cell.lastMode = mode;
 
-	if(!this.runtime || !this.kit) {
+	if(!runtime || !this.kit) {
 		return; // runtime still loading; will be evaluated once ready
 	}
 
 	clearCellVariables(cell);
 	if(!mode) {
+		updateCellNotebookImports(cell, new Set());
 		// An unmapped type is intentionally not interpreted as JavaScript.
-		cell.root.className = "tc-notebook-output-content";
+		if(!cell.hidden) cell.root.className = "tc-notebook-output-content";
 		cell.root.textContent = "";
 		return;
 	}
 
+	var notebookImports = new Set();
 	try {
-		var transpiled = this.kit.transpile(text, mode, {
+		var source = rewriteNotebookImportDeclarations(this.kit, text, mode);
+		var transpiled = this.kit.transpile(source, mode, {
 			resolveImport: function(specifier) {
-				return resolveNotebookImport(this.runtimeContext, specifier);
+				return resolveNotebookImport(this, notebookImports, specifier);
 			}.bind(this)
 		});
 		var definition = Object.assign({}, transpiled, {
 			id: cell.title,
 			body: eval.call(null, transpiled.body)
 		});
-		cell.root.className = "tc-notebook-output-content";
+		if(!cell.hidden) cell.root.className = "tc-notebook-output-content";
 		cell.root.textContent = "";
 		// `cell` acts as notebook-kit's "node": it has `.root` (read live off
 		// this object, so later runtime updates keep targeting whatever
 		// `cell.root` currently points to) and `.variables`.
-		this.runtime.define(cell, definition);
+		runtime.define(cell, definition);
+		updateCellNotebookImports(cell, notebookImports);
 	} catch(error) {
+		updateCellNotebookImports(cell, new Set());
 		console.error("tc-notebook: error evaluating cell '" + cell.title + "'", error);
-		this.showCellError(cell, error.message);
+		if(!cell.hidden) this.showCellError(cell, error.message);
 	}
 };
 
@@ -437,7 +603,27 @@ NotebookWidget.prototype.disposeCell = function(cell) {
 	// (the $list, typically) - it's responsible for adding/removing it.
 	// We just stop tracking it and tear down its notebook-kit variables.
 	clearCellVariables(cell);
+	updateCellNotebookImports(cell, new Set());
 	cell.root.remove();
+};
+
+NotebookWidget.prototype.reconcileImportedNotebooks = function() {
+	var changed = false;
+	Array.from(this.importedNotebooks.values()).forEach(function(record) {
+		if(reconcileImportedNotebook(record)) changed = true;
+	});
+	return changed;
+};
+
+NotebookWidget.prototype.reevaluateAllRuntimeCells = function() {
+	var self = this;
+	this.cells.forEach(function(cell) { self.evaluateCell(cell); });
+	Array.from(this.importedNotebooks.values()).forEach(function(record) {
+		if(!record.runtime || record.disposed) return;
+		record.cells.forEach(function(cell) {
+			self.evaluateCellInRuntime(cell, record.runtime);
+		});
+	});
 };
 
 /* For cells whose output element persisted across this refresh, check
@@ -487,7 +673,7 @@ NotebookWidget.prototype.reevaluateChangedAttachments = function(changedTiddlers
 	if(changed) {
 		context.scopes.forEach(function(scope) {
 			if(scope.removed) return;
-			scope.cells.forEach(function(cell) { scope.evaluateCell(cell); });
+			scope.reevaluateAllRuntimeCells();
 		});
 	}
 	return changed;
@@ -509,7 +695,7 @@ NotebookWidget.prototype.reevaluateChangedModules = function(changedTiddlers) {
 	if(changed) {
 		context.scopes.forEach(function(scope) {
 			if(scope.removed) return;
-			scope.cells.forEach(function(cell) { scope.evaluateCell(cell); });
+			scope.reevaluateAllRuntimeCells();
 		});
 	}
 	return changed;
@@ -524,11 +710,13 @@ NotebookWidget.prototype.refresh = function(changedTiddlers) {
 
 	var childrenRefreshed = this.refreshChildren(changedTiddlers);
 	var cellsChanged = this.reconcileCells();
+	var importedNotebooksChanged = this.reconcileImportedNotebooks();
 	var attachmentsReevaluated = this.reevaluateChangedAttachments(changedTiddlers);
 	var modulesReevaluated = this.reevaluateChangedModules(changedTiddlers);
 	var reevaluated = this.reevaluateChangedCells(changedTiddlers);
 
-	return !!(childrenRefreshed || cellsChanged || attachmentsReevaluated || modulesReevaluated || reevaluated);
+	return !!(childrenRefreshed || cellsChanged || importedNotebooksChanged ||
+		attachmentsReevaluated || modulesReevaluated || reevaluated);
 };
 
 NotebookWidget.prototype.destroy = function() {
@@ -538,6 +726,10 @@ NotebookWidget.prototype.destroy = function() {
 		this.cells.forEach(function(cell) { self.disposeCell(cell); });
 		this.cells.clear();
 	}
+	if(this.importedNotebooks) {
+		Array.from(this.importedNotebooks.values()).forEach(disposeImportedNotebook);
+		this.importedNotebooks.clear();
+	}
 	if(this.runtimeContext) {
 		if(this.isRuntimeOwner && !this.runtimeContext.disposed) {
 			this.runtimeContext.disposed = true;
@@ -546,6 +738,8 @@ NotebookWidget.prototype.destroy = function() {
 				scope.removed = true;
 				scope.cells.forEach(function(cell) { scope.disposeCell(cell); });
 				scope.cells.clear();
+				Array.from(scope.importedNotebooks.values()).forEach(disposeImportedNotebook);
+				scope.importedNotebooks.clear();
 			});
 			if(this.runtimeContext.notebookRuntime && this.runtimeContext.notebookRuntime.dispose) {
 				this.runtimeContext.notebookRuntime.dispose();

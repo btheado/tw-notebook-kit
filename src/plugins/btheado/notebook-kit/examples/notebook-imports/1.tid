@@ -1,0 +1,7 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-imports/1
+type: text/x-markdown
+
+# Tiddler notebook imports
+
+The import filter selects the source cells. The named imports select reactive
+variables declared by those cells.

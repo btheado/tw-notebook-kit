@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-imports/3
+type: application/javascript
+
+({base, result})

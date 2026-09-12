@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-imports/source/2
+type: application/javascript
+
+const doubled = base * 2;

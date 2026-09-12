@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-imports/2
+type: application/javascript
+
+import {base, doubled as result} from "tw-notebook:[prefix[notebook-imports/source/]]";

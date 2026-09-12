@@ -91,6 +91,28 @@ cells are re-evaluated. Imported tiddler modules should currently be
 self-contained: imports inside a `tw:` module are handled by the browser and
 are not themselves rewritten by Notebook Kit.
 
+!! Tiddler notebook imports
+
+Use the `tw-notebook:` prefix to import reactive variables from a collection
+of notebook cell tiddlers. Everything after the prefix is a TiddlyWiki filter:
+
+```js
+import {base, doubled as result}
+  from "tw-notebook:[tag[shared-notebook-cell]]";
+```
+
+Put the import declaration in its own cell. Other cells in the importing
+notebook can then refer to `base` and `result` normally. The filter selects the
+source cells; the named imports select variables declared by those cells. All
+selected cells are evaluated together in a separate reactive module, allowing
+them to depend on each other. Aliases such as `doubled as result` are supported.
+
+The filter is evaluated with the importing `<$notebook-kit>` widget as its
+variable context. When a selected cell changes, its imported variables and
+their dependents update reactively. The filter is also evaluated again after
+wiki changes, so cells that newly match or cease to match are added or removed
+from the imported module.
+
 !! Notes
 
 I highly recommend installing the Codemirror and Highlight plugins. Their syntax

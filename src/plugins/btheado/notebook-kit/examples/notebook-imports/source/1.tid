@@ -1,0 +1,4 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-imports/source/1
+type: application/javascript
+
+const base = 21;

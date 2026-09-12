@@ -1,0 +1,18 @@
+title: $:/plugins/btheado/notebook-kit/examples/notebook-imports
+
+<$testcase>
+  <$data $tiddler="$:/plugins/btheado/notebook-kit"/>
+  <$data $tiddler="$:/plugins/tiddlywiki/highlight"/>
+  <$data title=Description text="Import reactive variables from cells selected by a TiddlyWiki filter"/>
+  <$data title=Output text="""<$notebook-kit>
+<$list filter="[range[3]]">
+<$codeblock code={{!!text}} language={{!!type}} /> <div class="tc-notebook-output" data-tiddler-title=<<currentTiddler>>/>
+</$list>
+</$notebook-kit>"""/>
+<$list filter="[range[3]]" variable=cell>
+  <$data $tiddler={{{ [<currentTiddler>addsuffix[/]addsuffix<cell>] }}} title=<<cell>>/>
+</$list>
+<$list filter="[range[2]]" variable=cell>
+  <$data $tiddler={{{ [<currentTiddler>addsuffix[/source/]addsuffix<cell>] }}} title={{{ [[notebook-imports/source/]addsuffix<cell>] }}}/>
+</$list>
+</$testcase>
