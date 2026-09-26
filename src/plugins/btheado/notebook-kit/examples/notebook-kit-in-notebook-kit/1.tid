@@ -1,5 +1,5 @@
 title: $:/plugins/btheado/notebook-kit/examples/notebook-kit-in-notebook-kit/1
 type: application/javascript
 
-import {NotebookRuntime} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.8/runtime/+esm';
-import {transpileJavaScript} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.1.8/+esm';
+import {NotebookRuntime} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.6.4/runtime/+esm';
+import {transpileJavaScript} from 'https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.6.4/+esm';

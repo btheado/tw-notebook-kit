@@ -7,9 +7,8 @@ const code_samples = ["[1, 2, 3]", "[1, 2, 3, 4, 5]", "display(42);"];
 const cell = {root: cellDiv, variables: [] };
 const todef = (c, id) => ({...c, id, body: eval.call(null, c.body)});
 
-const noobserver = {};
 function dispose(variable) {
-  variable._observer &&= noobserver; // don’t render undefined
+  variable.dispose();
   variable.delete();
 }
 
@@ -17,4 +16,3 @@ const clearCellVariables = cell => {
   cell.variables.forEach(dispose);
   cell.variables = [];
 };
-

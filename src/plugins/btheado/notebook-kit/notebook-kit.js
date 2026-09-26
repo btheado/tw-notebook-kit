@@ -57,8 +57,8 @@ var notebookKitPromise = null;
 function loadNotebookKit() {
 	if(!notebookKitPromise) {
 		notebookKitPromise = Promise.all([
-			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.4.1/runtime/+esm"),
-			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.4.1/+esm")
+			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.6.4/runtime/+esm"),
+			import("https://cdn.jsdelivr.net/npm/@observablehq/notebook-kit@2.6.4/+esm")
 		]).then(function(modules) {
 			return {
 				NotebookRuntime: modules[0].NotebookRuntime,
@@ -86,11 +86,8 @@ function modeForTiddler(wiki, tiddler) {
 	return wiki.getTiddlerText(TYPE_MAPPING_PREFIX + type);
 }
 
-const noobserver = {};
 function dispose(variable) {
-	if(variable._disposed) return;
-	variable._disposed = true;
-	variable._observer &&= noobserver; // don't render undefined
+	variable.dispose();
 	variable.delete();
 }
 
